@@ -25,7 +25,7 @@ function Home(){
                 setVersion(value[0])
                 setSerial(value[1])
                 setWifi(value[2])
-                if(value.length > 3){
+                if(value.length > 3){   
                     let a : string[] = []
                     for (let i = 3; i < value.length; i++) {
                         a.push(value[i])
@@ -38,33 +38,14 @@ function Home(){
     return (
     <HomeArea>
         <HomeContainer>
-            <ImageButton type="main1" src={fileImg} onClick={() => {navigate('/model')}}>Select File</ImageButton>
-            <ImageButton type="main2" src={settingImg} color="gray" onClick={() => {navigate('/setting')}}>Setting</ImageButton>
-            <ImageButton type="main2" src={infoImg} color="gray" onClick={()=>{setModalVisible(true)}}>Info</ImageButton> 
+            <ImageButton type="washBtn" src={fileImg} onClick={() => {navigate('/setting')}}>Wash</ImageButton>
+            <ImageButton type="quickBtn" src={settingImg} color="gray" onClick={() => {navigate('/progress')}}>Quick Wash</ImageButton>
         </HomeContainer>
-        <Modal selectVisible={false} visible={modalVisible} onBackClicked={()=>{setModalVisible(false)}} >
-            <InfoArea>
-                <TitleText> Version </TitleText>
-                <ValueText> {version} </ValueText>
-                <TitleText> Serial</TitleText>
-                <ValueText> {serial} </ValueText>
-                <TitleText> WiFi </TitleText>
-                <ValueText> {wifi} </ValueText>
-                <TitleText> IP </TitleText>
-                <div>
-                {
-                    ip.length != 0 && ip.map((value:string,index:number)=>{
-                        return (<ValueText> {value} </ValueText>)
-                    })
-                }
-                </div>
-            </InfoArea>
-        </Modal>
     </HomeArea>);
 }
 const HomeArea = styled.div`
     display: flex;
-    width: 479px;
+    width: 480px;
     height: 320px;
 
     justify-content: center;
@@ -93,24 +74,6 @@ const HomeContainer = styled.div`
 
     }
 `
-const InfoArea = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 3fr;
-    grid-template-rows: 1fr 1fr 1fr auto;
-    justify-items: right;
-    row-gap: 5px;
-    column-gap: 5px;
-    margin-top: 10px;
-`
-const TitleText = styled.div`
-    font-size: 23px;
-    color: #474747;
-    background-color: #00000000;
-`
-const ValueText = styled.div`
-    font-size: 23px;
-    color: #474747;
-    font-weight: bold;
-`
+
 export default Home;
 

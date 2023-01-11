@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import React, { Children } from 'react'
 import Button from './Button';
-import './ImageButton.scss'
+import '../styles/ImageButton.scss'
 
 type ImageButtonProps = {
     src: string;

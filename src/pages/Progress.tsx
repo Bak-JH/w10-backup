@@ -31,7 +31,7 @@ function Progress(){
 
     const [infoModalVisible,setInfoModalVisible] = useState<boolean>(false)
     const [quitModalVisible,setQuitModalVisible] = useState<boolean>(false)
-    const [quitModalBtnEnable,setQuitModalBtnEnable] = useState<boolean>(false)
+    const [quitModalBtnEnable,setQuitModalBtnEnable] = useState<boolean>(true)
     const [quitWork,setQuitWork] = useState<boolean>(false)
 
     const isError = useRef("false")
@@ -116,13 +116,6 @@ function Progress(){
             </Header>
             <MainArea>
                 <CircularProgressArea>
-
-                    <TitleText>
-                        File name
-                    </TitleText>
-                    <ValueText>
-                        <SlideText text={filename}/>
-                    </ValueText>
                     <TitleText>
                         Remaining time
                     </TitleText>
@@ -133,6 +126,14 @@ function Progress(){
                             : totalTime == 0 ? "Calculating" : time.getMinutes() +"min " + time.getSeconds() + "sec"
                         }
                     </ValueText>
+
+                    <TitleText>
+                        Status
+                    </TitleText>
+                    <ValueText>
+                        {filename}
+                    </ValueText>
+
 
                     <CircleProgress>
                         <CircularProgressbarWithChildren value={progressValue} maxValue={100} minValue={0} strokeWidth={7}
@@ -152,24 +153,14 @@ function Progress(){
                 </CircularProgressArea>
             </MainArea>
             <Footer>
-                <Button color='gray' type='small' onClick={() => {setInfoModalVisible(true)}}> Print Info </Button>
+                <Button color='gray' type='small' onClick={() => {
+                    window.electronAPI.printCommandRM("pause")}}> Pause </Button>
                 <Button color='blue' type='small' 
-                onClick={() => {
-                    window.electronAPI.printCommandRM("pause")}}> Quit </Button> 
+                onClick={() => {setQuitModalVisible(true)}}> Quit </Button> 
             </Footer>
-            <Modal selectVisible={false} visible={infoModalVisible} onBackClicked={() => setInfoModalVisible(false)}>
-                <ModalInfoMainArea>
-                    <ModalInfoTitle text="File Name"/>
-                    <ModalInfoValue text={filename}/>
-                    <ModalInfoTitle text='Material'/>
-                    <ModalInfoValue text={material}/>
-                    <ModalInfoTitle text='Layer Height'/>
-                    <ModalInfoValue text={`${layerHeight}mm/layer`}/>
-                </ModalInfoMainArea>
-            </Modal>
             <Modal visible={quitModalVisible} btnEnable={quitModalBtnEnable} selectString="Quit" backString="Resume"
-                onBackClicked={() => window.electronAPI.printCommandRM("resume")}
-                onSelectClicked={() => window.electronAPI.printCommandRM("quit")}
+                onBackClicked={() => setQuitModalVisible(false)}
+                onSelectClicked={() => {console.log('//complete/'+stopwatchRef.current.getTime()+"/"+isError.current); navigate('complete/'+stopwatchRef.current.getTime()+"/"+isError.current);}}
                 backVisible={!quitWork} selectVisible={!quitWork}>
                     <ModalNotice text={
                         quitWork ? "wait for movement" : "Are you sure to quit?"

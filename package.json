@@ -88,18 +88,11 @@
     "electron:worker:build": "tsc --build electron/worker",
     "electron:dev": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron .\"",
     "electron:dev:nosandbox": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && tsc -p electron -w --no-sandbox\" \"wait-on http://localhost:3000 && tsc -p electron && electron . --no-sandbox\"",
-    "electron:build": "rm -rf ./build-addon && yarn addon:build && mv ./build ./build-addon && yarn build && tsc -p electron && electron-builder build",
-    "electron:build:rpi": "rm -rf ./build-addon && yarn addon:arm && mv ./build ./build-addon && yarn build && tsc -p electron && electron-builder build",
+    "electron:build": "rm -rf ./build-addon && mv ./build ./build-addon && yarn build && tsc -p electron && electron-builder build",
     "electron:debug": "tsc -p electron",
     "electron-start-win": "set ELECTRON_START_URL=http://localhost:3000 && tsc -p electron     && electron .",
     "electron-start-win-watch": "set ELECTRON_START_URL=http://localhost:3000 && tsc -p electron -w ",
-    "react-start-win": "set BROWSER=none && yarn start",
-    "addon:init": "node-gyp configure",
-    "addon:arm": "cross-env AR=arm-linux-gnueabihf-ar LINK=arm-linux-gnueabihf-g++ CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ node-gyp configure --arch=arm build --release --build-dir=build-addon",
-    "addon:clean": "node-gyp clean",
-    "addon:build": "node-gyp clean configure build --release",
-    "addon:build:dev": "node-gyp clean configure build --debug",
-    "hixImageViewer:build": "cmake -H. -Bhix-image-viewer/build -G \"Unix Makefiles\" ./hix-image-viewer && cmake --build ./hix-image-viewer/build"
+    "react-start-win": "set BROWSER=none && yarn start"
   },
   "eslintConfig": {
     "extends": [

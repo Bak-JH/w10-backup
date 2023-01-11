@@ -4,21 +4,22 @@
   display: flex;
 
   align-items: center;
-  &.main1 {
+  &.washBtn {
     width: 80px;
     height: 80px;
     font-size: 32px;
 
   }
-  &.main2 {
+  &.quickBtn{
     width: 60px;
     height: 60px;
     font-size: 20px;
     position: left;
   }
-  &.middle {
-    width: 50px;
-    height: 50px;
+  &.startBtn{
+    width: 60px;
+    height: 60px;
     font-size: 20px;
+    position: left;
   }
 }

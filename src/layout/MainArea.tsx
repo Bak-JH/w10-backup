@@ -17,14 +17,13 @@ function MainArea({children} : MainAreaProp){
 
 const MainAreaDIV = styled.div`
     display: flex;
-    
+    align-items: center;
+    justify-content: center;
+
     flex-direction: column;
     
     width: 479px;
     height: 210px;
-    
-    align-items: center;
-    justify-content: center;
 `
 
 export default MainArea;

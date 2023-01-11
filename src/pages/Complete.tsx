@@ -57,30 +57,18 @@ function Complete(){
 
     return (
     <div>
-        <MainArea>
-            <FinishArea>
+        <FinishArea>
                 <FinishImg src={isError ? errorImg : checkImg} width={60}/>
                 <FinishText>
                     {
-                        isError ? "Printing Error!" : "Printing Compeleted!"
+                        isError ? "Wash Error!" : "Wash Compeleted!"
                     }
                 </FinishText>
-            </FinishArea>
-            <InfoArea>
-                <InfoText>File Name</InfoText>
-                <InfoValue>
-                    <SlideText text={filename}/>
-                </InfoValue>
-                <InfoText>Material</InfoText>
-                <InfoValue>{resin}</InfoValue>
-                <InfoText>Time Spent</InfoText>
-                <InfoValue>{spentTime}</InfoValue>
-            </InfoArea>
-        </MainArea>
+        </FinishArea>
         <Footer>
                 <Button color='gray' type='small' onClick={() => {
                     window.electronAPI.printCommandRM("printAgain")
-                }}> Print again </Button>
+                }}> Wash again </Button>
                 <Button color='blue' type='small' onClick={() => {
                     navigate('/') }}> Close </Button> 
         </Footer>
@@ -92,38 +80,19 @@ function Complete(){
 const FinishArea = styled.div`
     display: flex;
     align-items: center;
-    /* justify-content: space-evenly; */
-    margin-top: 45px;
+    justify-content: center;
+
+    flex-direction: column;
+    row-gap: 20px;
+
+    width: 479px;
+    height: 260px;
 `
 const FinishImg = styled.img``
 
 const FinishText = styled.div`
     color: black;
-
     font-size: 27px;
-    margin-left: 30px;
-`
-const InfoArea = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    
-    column-gap: 15px;
-    row-gap: 10px;
-    margin-top: 30px;
-    font-size: 20px;
-`
-const InfoText = styled.div`
-    color: #474747;
-    justify-self: right;
-`
-const InfoValue = styled.div`
-    color: black;
-    justify-self: left;
-    font-weight: bold;
-
-    width: auto;
-    max-width: 200px;
 `
 
 export default Complete;
