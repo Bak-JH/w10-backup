@@ -2,6 +2,8 @@
 import { BrowserWindow, ipcMain, IpcMainEvent } from "electron"
 import { ProductCH, WorkerCH } from './ipc/cmdChannels'
 import { productIpcInit } from "./ipc/product"
+const Gpio = require('onoff').Gpio;
+const test = new Gpio(6, 'out');
 
 import { PrintWorker, WorkingState } from "./printWorker"
 

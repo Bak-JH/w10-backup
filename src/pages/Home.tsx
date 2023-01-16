@@ -3,6 +3,8 @@ import ImageButton from '../components/ImageButton';
 import fileImg from '../assets/file.png';
 import settingImg from '../assets/settings.png';
 import infoImg from '../assets/info.png';
+import waterImg from '../assets/wash.png'
+import quickImg from '../assets/quick-2.png'
 import styled from 'styled-components'
 
 import { useNavigate } from 'react-router-dom';
@@ -38,8 +40,8 @@ function Home(){
     return (
     <HomeArea>
         <HomeContainer>
-            <ImageButton type="washBtn" src={fileImg} onClick={() => {navigate('/setting')}}>Wash</ImageButton>
-            <ImageButton type="quickBtn" src={settingImg} color="gray" onClick={() => {navigate('/progress')}}>Quick Wash</ImageButton>
+            <ImageButton type="washBtn" src={waterImg} onClick={() => {navigate('/setting')}}>Wash</ImageButton>
+            <ImageButton type="quickBtn" src={quickImg} color="gray" onClick={() => {navigate('/progress')}}>Quick<br />Wash</ImageButton>
         </HomeContainer>
     </HomeArea>);
 }

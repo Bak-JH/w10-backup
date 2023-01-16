@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button';
 import ImageButton from '../components/ImageButton';
-import settingImg from '../assets/settings.png';
+import settingImg from '../assets/play.png';
 import styled from 'styled-components'
 
 import { useNavigate } from 'react-router-dom';
@@ -40,16 +40,18 @@ function Setting(){
         <PageContainer style={{'rowGap': '30px', 'width': 255}}>
             <SetValue
                         title='Wash Time'
+                        display='time'
                         value={totalTime}
                         minValue={80}
                         maxValue={120}
-                        sumValue={1}
+                        sumValue={10}
                         onValueChange={(v : number) => {
                             setTotalTime(v)
                         }}
                         />
             <SetValue
                         title='Motor Speed'
+                        display='number'
                         value={motorSpeed}
                         minValue={0}
                         maxValue={10}

@@ -7,10 +7,10 @@ import minusBtnImg from '../assets/minus.png';
 
 type CalibrationProps = {
   title: string;
+  display: string;
   value: number;
   maxValue: number | undefined;
   minValue: number | undefined;
-
   sumValue: number;
 
   btnEnable: boolean;
@@ -18,8 +18,24 @@ type CalibrationProps = {
   onValueChange?: (v : number) => void;
 }
 
-function SetValue({title,value,minValue,maxValue,sumValue,btnEnable,onValueChange} : CalibrationProps){
-
+function SetValue({title,display,value,minValue,maxValue,sumValue,btnEnable,onValueChange} : CalibrationProps){
+  let displayValue:string;
+  if(display == 'time')
+  {
+    let minute:string;
+    let second:string;
+    minute = Math.floor(value/60) < 10? 
+      '0'+ Math.floor(value/60)
+      : Math.floor(value/60).toString();
+    second = Math.floor(value%60) < 10? 
+      '0'+ Math.floor(value%60)
+      : Math.floor(value%60).toString();
+    displayValue = minute + ' : ' + second;
+  }
+  else
+  {
+    displayValue = value.toString();
+  }
 
   return (
       <CalibrationContainer>
@@ -35,7 +51,9 @@ function SetValue({title,value,minValue,maxValue,sumValue,btnEnable,onValueChang
                 onValueChange && onValueChange(value - sumValue <= minValue ? minValue : value - sumValue)
             }}> <SumButtonImg src={minusBtnImg}/> </SumButton>
 
-            <div style={{width: '70px', justifyItems: 'center',  alignItems: 'center'}}>{value}</div>
+            <div style={{width: '100px', justifyItems: 'center',  alignItems: 'center'}}>
+              {displayValue}
+            </div>
 
             <SumButton onClick={()=>{
               if(!btnEnable)
@@ -89,7 +107,7 @@ const CalibrationValue = styled.div`
   flex-direction: row;
   justify-items: center;
   align-items: center;
-  column-gap: 25px;
+  column-gap: 15px;
 `
 
 const SumButton = styled.div`
