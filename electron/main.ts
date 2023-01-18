@@ -3,27 +3,21 @@ import {app, BrowserWindow, Menu, screen, session} from 'electron';
 import path from 'path';
 import url from 'url';
 import isDev from 'electron-is-dev';
-
-import { ipcHandle } from './ipc/ipc';
-import { mainProsessing } from './mainProsess';
-
+import { ReadCommandFile } from './process';
 function createWindow() {
-    /*
-    * 넓이 1920에 높이 1080의 FHD 풀스크린 앱을 실행시킵니다.
-    * */
-  
+
+    // create pi window
     const mainWin = new BrowserWindow({
-        width:479,
+        width:480,
         height:320,
         backgroundColor: "#EEF5F9",
         titleBarStyle: process.platform === "win32" ? "default":"hidden",
-        // titleBarStyle: "default",
         webPreferences: {
           preload: path.join(__dirname, 'preload.js'),
         },
-        // disableAutoHideCursor: true
     });
     
+    // set menu item disable
     const template : Array<(Electron.MenuItem)> = []; 
     const menu = Menu.buildFromTemplate(template); 
     Menu.setApplicationMenu(menu);
@@ -45,7 +39,6 @@ function createWindow() {
     * */
 
     mainWin.loadURL(mainUrl);
-    // imgWin.loadURL(imageUrl);
     
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') app.quit()
@@ -63,13 +56,13 @@ function createWindow() {
                 'electron' + (process.platform === "win32" ? ".cmd" : "")),
             forceHardReset: true,
             hardResetMethod: 'exit',
-
         });
     }
-    // mainProsessing(mainWin)
+
+    const read = new ReadCommandFile('/home/bakjh/Downloads/motor_test.hc')
+    read.read()
 }
 
 app.whenReady().then(() => {
-    // ipcHandle()
     createWindow()
 })
