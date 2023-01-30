@@ -1,37 +1,52 @@
+import { BinaryValue, Gpio } from 'onoff';
+
 enum GPIOPin {
     pump1         = 6,
     pump2         = 16,
     valve         = 21,
     propeller1    = 19,
-    propeller2    = 20 // not in use
+    propeller2    = 20, // not in use
+    ERROR         = 999
 }
 
 enum PWMPin {
     pump          = 12,
-    propeller     = 13
-}
-abstract class Action{
+    propeller     = 13,
+    ERROR         = 999
 }
 
-class GPIOAction extends Action {
+function toBinaryValue(boolValue:boolean):BinaryValue {
+    return boolValue ? 1 : 0;
+}
+
+abstract class Action{
+    //method
+    public abstract run():void;
+}
+
+abstract class GPIOAction extends Action {
     //variable
     private readonly _pin!:GPIOPin 
+    protected _gpioObj!:Gpio;
 
     //getter
     get pin() : GPIOPin { return this._pin; }
+    get gpioObj() : Gpio { return this._gpioObj }
 
     //method
-    constructor(pin:GPIOPin) { super(); this._pin = pin;  }
+    constructor(pin:GPIOPin) { super(); this._pin = pin; this._gpioObj = new Gpio(pin, "out"); }
 }
-class PWMAction extends Action{
+abstract class PWMAction extends Action{
     //variable
     private readonly _pin!:PWMPin
+    protected _gpioObj!:Gpio;
 
     //getter
     get pin () : PWMPin { return this._pin; }
+    get gpioObj() : Gpio { return this._gpioObj }
 
     //method
-    constructor(pin:PWMPin) { super(); this._pin = pin;  }
+    constructor(pin:PWMPin) { super(); this._pin = pin; }
 }
 
 class GPIOEnable extends GPIOAction {
@@ -43,6 +58,10 @@ class GPIOEnable extends GPIOAction {
 
     //method
     constructor(pin:GPIOPin, enable:boolean) { super(pin); this._enable = enable; }
+    public async run() {
+        // this._gpioObj.writeSync(toBinaryValue(this._enable));
+        console.log("GPIOAction: GPIOEnable");
+    }
 }
 
 class PWMEnable extends PWMAction {
@@ -54,6 +73,9 @@ class PWMEnable extends PWMAction {
 
     //method
     constructor(pin:PWMPin, enable:boolean) { super(pin); this._enable = enable; }
+    public run() {
+        console.log("GPIOAction: PWMEnable")
+    }
 }
 
 class PWMSetPeriod extends PWMAction {
@@ -67,6 +89,9 @@ class PWMSetPeriod extends PWMAction {
     constructor(pin:PWMPin, period:number) {
         if(period < 0) return; 
         super(pin); this._period = period; 
+    }
+    public run() {
+        console.log("PWMAction: PWMSetPeriod");
     }
 }
 
@@ -83,42 +108,73 @@ class PWMSetDuty extends PWMAction {
         super(pin); 
         this._duty = duty; 
     }
+    public run() {
+        console.log("PWMAction: PWMDuty");
+    }
 }
 
 class PWMLinearAccel extends PWMAction {
     //variable
-    private readonly _minSpd!:number
-    private readonly _maxSpd!:number
+    private readonly _minSpeed!:number
+    private readonly _maxSpeed!:number
     private readonly _duration!:number;
+    private readonly _timeStep = 1000;
 
     //method
-    constructor(pin:PWMPin, minSpd:number, maxSpd:number, duration:number) {
+    constructor(pin:PWMPin, minSpeed:number, maxSpeed:number, duration:number) {
         super(pin);
+
+        this._minSpeed = minSpeed;
+        this._maxSpeed = maxSpeed;
+        this._duration = duration;
     }
 
     stepTransform():Array<Action>
     {
-        const stepCnt = (_durationNS /_timeStepNS).ceil();
-        double spdInc = (_endSpeed - _beginSpeed)/ stepCnt;
-        List<IOAction> actions = [];
+        const stepCnt = Math.ceil(this._duration / this._timeStep);
+        const spdInc = (this._maxSpeed - this._minSpeed)/ stepCnt;
+        const actions:Array<Action> = [];
 
         for(var i = 0; i < stepCnt - 1; ++i)
         {
-        actions.add(PWMSetDuty(_pin, _beginSpeed + spdInc*i));
-        actions.add(Wait(Duration(microseconds: _timeStepMS)));
+            actions.push(new PWMSetDuty(this.pin, this._minSpeed + spdInc*i));
+            actions.push(new Wait(this._timeStep));
         }
         //we add last step by hand to ensure float error as following:
         //1. total duration must equal to actual duration
         //2. final speed must be exact equal to given end speed
-        actions.add(PWMSetDuty(_pin, _endSpeed));
-        if(_durationNS < _timeStepNS)
-        actions.add(Wait(Duration(microseconds: _durationNS)));
+        actions.push(new PWMSetDuty(this.pin, this._maxSpeed));
+        if(this._duration < this._timeStep)
+        actions.push(new Wait(this._duration));
         else
-        actions.add(Wait(Duration(microseconds: (_durationNS - _timeStepNS* (stepCnt - 1)))));
+        actions.push(new Wait(this._duration - this._timeStep * (stepCnt - 1)));
         return actions;
     }
-    PWMLinearAccel(PWMPin pin, double beginSpeed, double endSpeed, int durationNS):
-    _beginSpeed = beginSpeed,_endSpeed = endSpeed,_durationNS = durationNS, super(pin);
-    PWMLinearAccel.fromMS(PWMPin pin, double beginSpeed, double endSpeed, int durationMS):
-    _beginSpeed = beginSpeed,_endSpeed = endSpeed,_durationNS = durationMS * 1000000, super(pin);
+
+    public run() {
+        console.log("PWMAction: PWMLinearAccel");
+    }
 }
+
+class Wait extends Action {
+    //variable
+    private readonly _duration!:number;
+    private wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
+
+    //getter
+    get duration() : number { return this._duration; }
+
+    //method
+    constructor(duration:number) {
+        super();
+        this._duration = duration;
+    }
+
+    public async run() {
+        await setTimeout(()=>{console.log("Action: Wait");}, this._duration);
+    }
+}
+
+export {Action} // abstract class
+export {GPIOPin, PWMPin} // enum
+export {Wait, GPIOEnable, PWMEnable, PWMLinearAccel, PWMSetDuty, PWMSetPeriod} // actions

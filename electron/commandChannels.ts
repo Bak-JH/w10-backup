@@ -5,11 +5,18 @@
 //*MR - Main to Renderer
 //*TW - Renderer to Main Two Way
 
-enum workerCH{  
-    waitRM           = "worker:wait,           waitTime:number",
-    GPIOEnableRM     = "worker:GPIOEnable,     pin:number, enable:boolean", 
-    PWMEnableRM      = "worker:PWMEnable,      pin:number, enable:boolean",
-    PWMSetPeriodRM   = "worker:PWMSetPeriod,   pin:number, period:number",
-    PWMSetDutyRM     = "worker:PWMSetDuty,     pin:number, duty:number",
-    PWMLinearAccelRM = "worker:PWMLinearAccel, minSpd:number, maxSpd:number, accelTime:number",
+enum WorkerCH {  
+    startRM          = "worker:start",
+    commandRM          = "worker:command, cmd:string",
+    shutdownRM          = "worker:shutdown",
+    factoryResetRM          = "worker:factoryReset",
+
+    onProgressMR = "product:onProgress, callback:(event:IpcRendererEvent,progress: number) => void",
+    onSetTotalTimeMR = "product:onSetTotalTime, callback:(event:IpcRendererEvent,value:number)=>void",
 }
+
+enum ProductCH {
+    onShutDownEventMR = "product:onShutDownEvent, callback:(event:IpcRendererEvent) => void",
+}
+
+export {WorkerCH, ProductCH}

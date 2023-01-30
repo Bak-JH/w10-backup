@@ -1,8 +1,8 @@
 {
   "main": "build/electron/main.js",
-  "homepage": ".",
-  "description": "washer hix",
-  "author": "JSH",
+  "homepage": "https://hix.co.kr",
+  "description": "HiX Washer",
+  "author": "BakJH",
   "nodeGypRebuild": true,
   "build": {
     "extends": null,
@@ -24,7 +24,7 @@
       ]
     }
   },
-  "name": "waser",
+  "name": "washer",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

@@ -25,11 +25,8 @@ function Progress(){
 
     const [progressValue, setProgressValue] = useState<number>(45)
     const [filename, setFilename] = useState<string>("")
-    const [material, setMaterial] = useState<string>("")
-    const [layerHeight, setLayerHeight] = useState<number>(0.1)
     const [totalTime, setTotalTime] = useState(0)
 
-    const [infoModalVisible,setInfoModalVisible] = useState<boolean>(false)
     const [quitModalVisible,setQuitModalVisible] = useState<boolean>(false)
     const [quitModalBtnEnable,setQuitModalBtnEnable] = useState<boolean>(true)
     const [quitWork,setQuitWork] = useState<boolean>(false)
@@ -46,64 +43,6 @@ function Progress(){
             console.log(value)
             setTotalTime(value)
         })
-        const printerInfoListener = window.electronAPI.onPrintInfoMR((event:IpcRendererEvent,state:string,material:string,filename:string,layerHeight:number
-            ,elaspsedTime:number,totalTime:number,progress:number)=>{
-            setFilename(filename)
-            setMaterial(material)
-            setLayerHeight(layerHeight)
-            setTotalTime(totalTime)
-        })
-        const workingStateListener = window.electronAPI.onWorkingStateChangedMR((event:IpcRendererEvent,state:string,message?:string)=>{
-            switch(state){
-                case "working":
-                    setQuitModalVisible(false)
-                    stopwatchRef.current.start()
-                    break;
-                case "error":
-                    console.log(message)
-                    if(message)
-                        isError.current = message
-                    setQuitModalVisible(true)
-                    setQuitWork(true)
-                    break;
-                case "stop":
-                case "lock":
-                    stopwatchRef.current.stop()
-                    console.log('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current)
-                    navigate('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current)
-                    break;
-                case "pauseWork":
-
-                    setQuitModalVisible(true)
-                    setQuitModalBtnEnable(false)
-                    break;
-                case "pause":
-                    stopwatchRef.current.stop()
-                    setQuitModalBtnEnable(true)
-                    break;
-                case "stopWork":
-                    setQuitWork(true)
-                    break;
-                default:
-                    break;
-            }
-        })
-
-        window.electronAPI.requestPrintInfoRM()
-        stopwatchRef.current.start()
-
-        const id = setInterval(() => {
-            setelaspedTime(stopwatchRef.current.getTime())
-        }, 100)
-
-        return ()=>{
-            window.electronAPI.removeListener(printerInfoListener)
-            window.electronAPI.removeListener(progressListener)
-            window.electronAPI.removeListener(workingStateListener)
-            window.electronAPI.removeListener(setTotalTimeListener)
-
-            clearInterval(id)
-        }
     },[])
     
     let timeC = totalTime - elaspedTime
@@ -154,13 +93,13 @@ function Progress(){
             </MainArea>
             <Footer>
                 <Button color='gray' type='small' onClick={() => {
-                    window.electronAPI.printCommandRM("pause")}}> Pause </Button>
+                    window.electronAPI.washCommandRM("pause")}}> Pause </Button>
                 <Button color='blue' type='small' 
                 onClick={() => {setQuitModalVisible(true)}}> Quit </Button> 
             </Footer>
             <Modal visible={quitModalVisible} btnEnable={quitModalBtnEnable} selectString="Quit" backString="Resume"
                 onBackClicked={() => setQuitModalVisible(false)}
-                onSelectClicked={() => {console.log('//complete/'+stopwatchRef.current.getTime()+"/"+isError.current); navigate('complete/'+stopwatchRef.current.getTime()+"/"+isError.current);}}
+                onSelectClicked={() => {console.log('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current); navigate('complete/'+stopwatchRef.current.getTime()+"/"+isError.current);}}
                 backVisible={!quitWork} selectVisible={!quitWork}>
                     <ModalNotice text={
                         quitWork ? "wait for movement" : "Are you sure to quit?"

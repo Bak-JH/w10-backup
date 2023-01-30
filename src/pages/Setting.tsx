@@ -39,7 +39,7 @@ function Setting(){
                         />
         </PageContainer>
         <PageContainer>
-            <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {navigate('/progress')}}>Start</ImageButton>
+            <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {window.electronAPI.washStartRM()}}>Start</ImageButton>
             <Button type="cancelBtn" color="gray" onClick={() => {navigate('/home')}}>Cancel</Button>        
         </PageContainer>
     </HomeArea>);

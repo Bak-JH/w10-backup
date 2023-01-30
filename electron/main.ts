@@ -1,9 +1,10 @@
-import {app, BrowserWindow, Menu, screen, session} from 'electron';
+import {app, BrowserWindow, ipcMain, IpcMainEvent, Menu, screen, session} from 'electron';
 
 import path from 'path';
 import url from 'url';
 import isDev from 'electron-is-dev';
-import { ReadCommandFile } from './process';
+import { Process } from './mainProcess';
+import { WorkerCH } from './commandChannels';
 function createWindow() {
 
     // create pi window
@@ -59,8 +60,11 @@ function createWindow() {
         });
     }
 
-    const read = new ReadCommandFile('/home/bakjh/Downloads/motor_test.hc')
-    read.read()
+    const mainProcess = new Process("/home/bakjh/Downloads/motor_test.hc");
+
+    ipcMain.on(WorkerCH.startRM, (event:IpcMainEvent) => {
+        mainProcess.run();
+    })
 }
 
 app.whenReady().then(() => {
