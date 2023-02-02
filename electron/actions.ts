@@ -1,11 +1,11 @@
-import { BinaryValue, Gpio } from 'onoff';
+import { BinaryValue, Gpio} from 'onoff';
 
 enum GPIOPin {
     pump1         = 6,
     pump2         = 16,
-    valve         = 21,
     propeller1    = 19,
     propeller2    = 20, // not in use
+    valve         = 21,
     ERROR         = 999
 }
 
@@ -23,27 +23,31 @@ abstract class Action{
     //method
     public abstract run():void;
 }
-
+ 
 abstract class GPIOAction extends Action {
     //variable
     private readonly _pin!:GPIOPin 
-    protected _gpioObj!:Gpio;
+    protected _gpioObj!:object;
 
     //getter
     get pin() : GPIOPin { return this._pin; }
-    get gpioObj() : Gpio { return this._gpioObj }
+    get gpioObj() : object { return this._gpioObj }
 
     //method
-    constructor(pin:GPIOPin) { super(); this._pin = pin; this._gpioObj = new Gpio(pin, "out"); }
+    constructor(pin:GPIOPin) { 
+        super(); 
+        this._pin = pin; 
+        this._gpioObj = new Gpio(pin, "out"); 
+    }
 }
 abstract class PWMAction extends Action{
     //variable
     private readonly _pin!:PWMPin
-    protected _gpioObj!:Gpio;
+    protected _gpioObj!:object;
 
     //getter
     get pin () : PWMPin { return this._pin; }
-    get gpioObj() : Gpio { return this._gpioObj }
+    get gpioObj() : object { return this._gpioObj }
 
     //method
     constructor(pin:PWMPin) { super(); this._pin = pin; }

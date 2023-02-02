@@ -5,6 +5,7 @@ import url from 'url';
 import isDev from 'electron-is-dev';
 import { Process } from './mainProcess';
 import { WorkerCH } from './commandChannels';
+import { Gpio } from 'onoff';
 function createWindow() {
 
     // create pi window
@@ -59,8 +60,8 @@ function createWindow() {
             hardResetMethod: 'exit',
         });
     }
-
-    const mainProcess = new Process("/home/bakjh/Downloads/motor_test.hc");
+    
+    const mainProcess = new Process("./motor_test.hc");
 
     ipcMain.on(WorkerCH.startRM, (event:IpcMainEvent) => {
         mainProcess.run();

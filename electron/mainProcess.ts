@@ -2,6 +2,7 @@ import fs from 'fs'
 import { WashWorker } from './worker';
 import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel } from './actions';
 import { GPIOPin, PWMPin } from './actions';
+import { exit } from 'process';
 
 export class Process
 {
@@ -11,13 +12,15 @@ export class Process
 
     constructor(filePath: string) {
         try {
+            console.log(filePath);
             if(fs.existsSync(filePath))
                 this._filePath = filePath;
             else throw "FileNotFound";
 
             this.readCommandFile();
         } catch(err) {
-            console.log(err)
+            console.error(err);
+            exit();
         }   
     }
 
@@ -47,7 +50,13 @@ export class Process
                             this._worker.addAction(new Wait(parseInt(pin)));
                             break;
                         case "GPIOEnable":
-                            this._worker.addAction(new GPIOEnable(this.parseGPIO(pin), this.parseBoolean(tokens[2])));
+                            try {
+                                this._worker.addAction(new GPIOEnable(this.parseGPIO(pin), this.parseBoolean(tokens[2])));
+                            } catch (err) {
+                                console.log ("************")
+                                console.log(err)
+                                console.log ("************")
+                            }
                             break;
                         case "PWMEnable":
                             this._worker.addAction(new PWMEnable(this.parsePWM(pin), this.parseBoolean(tokens[2])));
