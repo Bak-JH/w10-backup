@@ -1,4 +1,5 @@
 import { BinaryValue, Gpio} from 'onoff';
+import { log } from './logging';
 
 enum GPIOPin {
     pump1         = 6,
@@ -37,20 +38,32 @@ abstract class GPIOAction extends Action {
     constructor(pin:GPIOPin) { 
         super(); 
         this._pin = pin; 
-        this._gpioObj = new Gpio(pin, "out"); 
+        try {
+            this._gpioObj = new Gpio(pin, "out");
+        } catch(err) {
+            log(err);
+        }
     }
 }
 abstract class PWMAction extends Action{
     //variable
     private readonly _pin!:PWMPin
-    protected _gpioObj!:object;
+    protected _pwmObj!:object;
 
     //getter
     get pin () : PWMPin { return this._pin; }
-    get gpioObj() : object { return this._gpioObj }
+    get gpioObj() : object { return this._pwmObj; }
 
     //method
-    constructor(pin:PWMPin) { super(); this._pin = pin; }
+    constructor(pin:PWMPin) { 
+        super(); 
+        this._pin = pin; 
+        try {
+            this._pwmObj = new Gpio(pin, "out");
+        } catch(err) {
+            log(err);
+        }
+    }
 }
 
 class GPIOEnable extends GPIOAction {
