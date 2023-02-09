@@ -35,6 +35,8 @@ abstract class GPIOAction extends Action {
 
     //method
     constructor(pin:GPIOPin) { 
+        if (pin == GPIOPin.ERROR) return;
+
         super(); 
         this._pin = pin; 
         this._gpioObj = new Gpio(pin, "out");
@@ -50,7 +52,9 @@ abstract class PWMAction extends Action {
     get pwmObj() : Gpio { return this._pwmObj; }
 
     //method
-    constructor(pin:PWMPin) { 
+    constructor(pin:PWMPin) {
+        if (pin == PWMPin.ERROR) return;
+
         super(); 
         this._pin = pin; 
         this._pwmObj = new Gpio(pin, "out");
@@ -65,7 +69,10 @@ class GPIOEnable extends GPIOAction {
     get enable() : boolean { return this._enable; }
 
     //method
-    constructor(pin:GPIOPin, enable:boolean) { super(pin); this._enable = enable; }
+    constructor(pin:GPIOPin, enable:boolean) { 
+        super(pin); 
+        this._enable = enable; 
+    }
     public run() {
         this._gpioObj.writeSync(toBinaryValue(this._enable));
         console.log("GPIOAction: GPIOEnable");
@@ -80,7 +87,11 @@ class PWMEnable extends PWMAction {
     get enable() : boolean { return this._enable; }
 
     //method
-    constructor(pin:PWMPin, enable:boolean) { super(pin); this._enable = enable; }
+    constructor(pin:PWMPin, enable:boolean) { 
+        super(pin); 
+        this._enable = enable; 
+    }
+
     public run() {
         this._pwmObj.writeSync(toBinaryValue(this._enable));
         console.log("GPIOAction: PWMEnable");
@@ -97,7 +108,8 @@ class PWMSetPeriod extends PWMAction {
     //method
     constructor(pin:PWMPin, period:number) {
         if(period < 0) return; 
-        super(pin); this._period = period; 
+        super(pin); 
+        this._period = period; 
     }
     public run() {
         console.log("PWMAction: PWMSetPeriod");
