@@ -180,7 +180,8 @@ class Wait extends Action {
     }
 
     public async run() {
-        await setTimeout(()=>{console.log("Action: Wait");}, this._duration);
+        console.log("Action: Wait");
+        await this.wait(this._duration);
     }
 }
 

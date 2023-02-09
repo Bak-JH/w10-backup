@@ -25,13 +25,13 @@ export class WashWorker {
         this._actions.push(action);
     }
 
-    public run() {
+    public async run() {
         this._stopwatch.reset()
         this._totalTime = 0;
         this._progress = 0;
 
-        while(this._actions.length > 0) {
-            this._actions.pop()?.run();
+        for(const action of this._actions) {
+            await action.run();
         }
 
         console.log("done");

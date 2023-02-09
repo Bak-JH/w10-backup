@@ -25,8 +25,8 @@ export class Process
         }   
     }
 
-    public run() {
-        this._worker.run();
+    public async run() {
+        await this._worker.run();
     }
 
     /**
