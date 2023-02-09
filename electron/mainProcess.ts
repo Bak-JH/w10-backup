@@ -3,6 +3,7 @@ import { WashWorker } from './worker';
 import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel } from './actions';
 import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
+import { log } from './logging';
 
 export class Process
 {
@@ -19,7 +20,7 @@ export class Process
 
             this.readCommandFile();
         } catch(err) {
-            console.error(err);
+            console.log(err);
             exit();
         }   
     }
@@ -52,25 +53,39 @@ export class Process
                         case "GPIOEnable":
                             try {
                                 this._worker.addAction(new GPIOEnable(this.parseGPIO(pin), this.parseBoolean(tokens[2])));
-                            } catch (err) {
-                                console.log ("************")
-                                console.log(err)
-                                console.log ("************")
+                            } catch (error) {
+                                console.log(error);
                             }
                             break;
                         case "PWMEnable":
-                            this._worker.addAction(new PWMEnable(this.parsePWM(pin), this.parseBoolean(tokens[2])));
+                            try {
+                                this._worker.addAction(new PWMEnable(this.parsePWM(pin), this.parseBoolean(tokens[2])));
+                            } catch (error) {
+                                console.log(error);
+                            }
                             break;
                         case "PWMSetPeriod":
-                            this._worker.addAction(new PWMSetPeriod(this.parsePWM(pin), parseFloat(tokens[2])));
+                            try {
+                                this._worker.addAction(new PWMSetPeriod(this.parsePWM(pin), parseFloat(tokens[2])));
+                            } catch (error) {
+                                console.log(error);
+                            }
                             break;
                         case "PWMSetDuty":
-                            this._worker.addAction(new PWMSetDuty(this.parsePWM(pin), parseFloat(tokens[2])));
+                            try {
+                                this._worker.addAction(new PWMSetDuty(this.parsePWM(pin), parseFloat(tokens[2])));
+                            } catch (error) {
+                                console.log(error);
+                            }
                             break;
                         case "PWMLinearAccel":
-                            this._worker.addAction(new PWMLinearAccel(this.parsePWM(pin), parseFloat(tokens[2]), parseFloat(tokens[3]), parseFloat(tokens[4])));
+                            try {
+                                this._worker.addAction(new PWMLinearAccel(this.parsePWM(pin), parseFloat(tokens[2]), parseFloat(tokens[3]), parseFloat(tokens[4])));
+                            } catch (error) {
+                                console.log(error);
+                            }
                             break;
-                        default: console.log(command);
+                        default: console.log(command);;
                     }
                 }
             });

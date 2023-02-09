@@ -1,5 +1,4 @@
 import { BinaryValue, Gpio} from 'onoff';
-import { log } from './logging';
 
 enum GPIOPin {
     pump1         = 6,
@@ -20,7 +19,7 @@ function toBinaryValue(boolValue:boolean):BinaryValue {
     return boolValue ? 1 : 0;
 }
 
-abstract class Action{
+abstract class Action {
     //method
     public abstract run():void;
 }
@@ -28,41 +27,33 @@ abstract class Action{
 abstract class GPIOAction extends Action {
     //variable
     private readonly _pin!:GPIOPin 
-    protected _gpioObj!:object;
+    protected _gpioObj!:Gpio;
 
     //getter
     get pin() : GPIOPin { return this._pin; }
-    get gpioObj() : object { return this._gpioObj }
+    get gpioObj() : Gpio { return this._gpioObj; }
 
     //method
     constructor(pin:GPIOPin) { 
         super(); 
         this._pin = pin; 
-        try {
-            this._gpioObj = new Gpio(pin, "out");
-        } catch(err) {
-            log(err);
-        }
+        this._gpioObj = new Gpio(pin, "out");
     }
 }
-abstract class PWMAction extends Action{
+abstract class PWMAction extends Action {
     //variable
     private readonly _pin!:PWMPin
-    protected _pwmObj!:object;
+    protected _pwmObj!:Gpio;
 
     //getter
     get pin () : PWMPin { return this._pin; }
-    get gpioObj() : object { return this._pwmObj; }
+    get pwmObj() : Gpio { return this._pwmObj; }
 
     //method
     constructor(pin:PWMPin) { 
         super(); 
         this._pin = pin; 
-        try {
-            this._pwmObj = new Gpio(pin, "out");
-        } catch(err) {
-            log(err);
-        }
+        this._pwmObj = new Gpio(pin, "out");
     }
 }
 
@@ -75,8 +66,8 @@ class GPIOEnable extends GPIOAction {
 
     //method
     constructor(pin:GPIOPin, enable:boolean) { super(pin); this._enable = enable; }
-    public async run() {
-        // this._gpioObj.writeSync(toBinaryValue(this._enable));
+    public run() {
+        this._gpioObj.writeSync(toBinaryValue(this._enable));
         console.log("GPIOAction: GPIOEnable");
     }
 }
@@ -91,7 +82,8 @@ class PWMEnable extends PWMAction {
     //method
     constructor(pin:PWMPin, enable:boolean) { super(pin); this._enable = enable; }
     public run() {
-        console.log("GPIOAction: PWMEnable")
+        this._pwmObj.writeSync(toBinaryValue(this._enable));
+        console.log("GPIOAction: PWMEnable");
     }
 }
 

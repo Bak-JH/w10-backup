@@ -5,7 +5,7 @@ import url from 'url';
 import isDev from 'electron-is-dev';
 import { Process } from './mainProcess';
 import { WorkerCH } from './commandChannels';
-import { Gpio } from 'onoff';
+
 function createWindow() {
 
     // create pi window
