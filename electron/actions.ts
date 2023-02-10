@@ -27,11 +27,11 @@ abstract class Action {
 abstract class GPIOAction extends Action {
     //variable
     private readonly _pin!:GPIOPin 
-    protected _gpioObj!:Gpio;
+    protected _pinObj!:Gpio;
 
     //getter
     get pin() : GPIOPin { return this._pin; }
-    get gpioObj() : Gpio { return this._gpioObj; }
+    get pinObj() : Gpio { return this._pinObj; }
 
     //method
     constructor(pin:GPIOPin) { 
@@ -39,17 +39,17 @@ abstract class GPIOAction extends Action {
 
         super(); 
         this._pin = pin; 
-        this._gpioObj = new Gpio(pin, "out");
+        this._pinObj = new Gpio(pin, "out");
     }
 }
 abstract class PWMAction extends Action {
     //variable
     private readonly _pin!:PWMPin
-    protected _pwmObj!:Gpio;
+    protected _pinObj!:Gpio;
 
     //getter
     get pin () : PWMPin { return this._pin; }
-    get pwmObj() : Gpio { return this._pwmObj; }
+    get pinObj() : Gpio { return this._pinObj; }
 
     //method
     constructor(pin:PWMPin) {
@@ -57,7 +57,7 @@ abstract class PWMAction extends Action {
 
         super(); 
         this._pin = pin; 
-        this._pwmObj = new Gpio(pin, "out");
+        this._pinObj = new Gpio(pin, "out");
     }
 }
 
@@ -74,7 +74,7 @@ class GPIOEnable extends GPIOAction {
         this._enable = enable; 
     }
     public run() {
-        this._gpioObj.writeSync(toBinaryValue(this._enable));
+        this.pinObj.writeSync(toBinaryValue(this._enable));
         console.log("GPIOAction: GPIOEnable");
     }
 }
@@ -93,7 +93,7 @@ class PWMEnable extends PWMAction {
     }
 
     public run() {
-        this._pwmObj.writeSync(toBinaryValue(this._enable));
+        this.pinObj.writeSync(toBinaryValue(this._enable));
         console.log("GPIOAction: PWMEnable");
     }
 }
@@ -101,6 +101,7 @@ class PWMEnable extends PWMAction {
 class PWMSetPeriod extends PWMAction {
     //variable
     private readonly _period!:number;
+    private _stopPWM:boolean = false
 
     //getter
     get period() : number { return this._period; }
@@ -111,7 +112,10 @@ class PWMSetPeriod extends PWMAction {
         super(pin); 
         this._period = period; 
     }
+
     public run() {
+        const interval = setInterval(_ => this.pinObj.writeSync(this.pinObj.readSync()), this.period)
+        
         console.log("PWMAction: PWMSetPeriod");
     }
 }
