@@ -1,79 +1,207 @@
+import { BinaryValue, Gpio} from 'onoff';
 
-type actionType = "movePosition" | "moveLength" | "ledEnable" | "ledToggle" | "wait" | "setImage" | "autoHome" | "checkTime" | "processImage";
-const enum moveType{
-    DOWN = 0,
-    UP = 1
+enum GPIOPin {
+    pump1         = 6,
+    pump2         = 16,
+    propeller1    = 19,
+    propeller2    = 20, // not in use
+    valve         = 21,
+    ERROR         = 999
 }
-abstract class Action{
-    abstract readonly type: actionType;
+
+enum PWMPin {
+    pump          = 12,
+    propeller     = 13,
+    ERROR         = 999
 }
 
-class AutoHome extends Action{
-    type: actionType = "autoHome";
+function toBinaryValue(boolValue:boolean):BinaryValue {
+    return boolValue ? 1 : 0;
+}
 
-    constructor(public readonly speed:number){
-        super()
+abstract class Action {
+    //method
+    public abstract run():void;
+}
+ 
+abstract class GPIOAction extends Action {
+    //variable
+    private readonly _pin!:GPIOPin 
+    protected _pinObj!:Gpio;
+
+    //getter
+    get pin() : GPIOPin { return this._pin; }
+    get pinObj() : Gpio { return this._pinObj; }
+
+    //method
+    constructor(pin:GPIOPin) { 
+        if (pin == GPIOPin.ERROR) return;
+
+        super(); 
+        this._pin = pin; 
+        this._pinObj = new Gpio(pin, "out");
     }
 }
-class MovePosition extends Action{
-    type: actionType = "movePosition";
+abstract class PWMAction extends Action {
+    //variable
+    private readonly _pin!:PWMPin
+    protected _pinObj!:Gpio;
 
-    constructor(public readonly position:number){
-        super()
+    //getter
+    get pin () : PWMPin { return this._pin; }
+    get pinObj() : Gpio { return this._pinObj; }
+
+    //method
+    constructor(pin:PWMPin) {
+        if (pin == PWMPin.ERROR) return;
+
+        super(); 
+        this._pin = pin; 
+        this._pinObj = new Gpio(pin, "out");
     }
 }
 
-class MoveLength extends Action{
-    type: actionType = "moveLength";
+class GPIOEnable extends GPIOAction {
+    //variable
+    private readonly _enable!:boolean
 
-    constructor(public readonly length:number){
-        super()
+    //getter
+    get enable() : boolean { return this._enable; }
+
+    //method
+    constructor(pin:GPIOPin, enable:boolean) { 
+        super(pin); 
+        this._enable = enable; 
+    }
+    public run() {
+        this.pinObj.writeSync(toBinaryValue(this._enable));
+        console.log("GPIOAction: GPIOEnable");
     }
 }
 
-class LEDEnable extends Action{
-    type: actionType = "ledEnable";
+class PWMEnable extends PWMAction {
+    //variable
+    private readonly _enable!:boolean
 
-    constructor(public readonly enable: boolean){
-        super()
+    //getter
+    get enable() : boolean { return this._enable; }
+
+    //method
+    constructor(pin:PWMPin, enable:boolean) { 
+        super(pin); 
+        this._enable = enable; 
+    }
+
+    public run() {
+        this.pinObj.writeSync(toBinaryValue(this._enable));
+        console.log("GPIOAction: PWMEnable");
     }
 }
-class LEDToggle extends Action{
-    type: actionType = "ledToggle";
 
-    constructor(public readonly timeout: number){
-        super()
+class PWMSetPeriod extends PWMAction {
+    //variable
+    private readonly _period!:number;
+    private _stopPWM:boolean = false
+
+    //getter
+    get period() : number { return this._period; }
+
+    //method
+    constructor(pin:PWMPin, period:number) {
+        super(pin); 
+        
+        if(period < 0) return; 
+        this._period = period; 
+    }
+
+    public run() {
+        const interval = setInterval(_ => this.pinObj.writeSync(this.pinObj.readSync()), this.period)
+        
+        console.log("PWMAction: PWMSetPeriod");
     }
 }
 
-class Wait extends Action{
-    type: actionType = "wait";
+class PWMSetDuty extends PWMAction {
+    //variable
+    private readonly _duty!:number;
 
-    constructor(public readonly msec : number){
-        super()
+    //getter
+    get period() : number { return this._duty; }
+
+    //method
+    constructor(pin:PWMPin, duty:number) { 
+        super(pin); 
+        if(duty < 0 || duty > 1) return;
+        this._duty = duty; 
+    }
+    public run() {
+        console.log("PWMAction: PWMDuty");
     }
 }
-class SetImage extends Action{
-    type: actionType = "setImage";
 
-    constructor(){
-        super()
+class PWMLinearAccel extends PWMAction {
+    //variable
+    private readonly _minSpeed!:number
+    private readonly _maxSpeed!:number
+    private readonly _duration!:number;
+    private readonly _timeStep = 1000;
+
+    //method
+    constructor(pin:PWMPin, minSpeed:number, maxSpeed:number, duration:number) {
+        super(pin);
+
+        this._minSpeed = minSpeed;
+        this._maxSpeed = maxSpeed;
+        this._duration = duration;
+    }
+
+    stepTransform():Array<Action>
+    {
+        const stepCnt = Math.ceil(this._duration / this._timeStep);
+        const spdInc = (this._maxSpeed - this._minSpeed)/ stepCnt;
+        const actions:Array<Action> = [];
+
+        for(var i = 0; i < stepCnt - 1; ++i)
+        {
+            actions.push(new PWMSetDuty(this.pin, this._minSpeed + spdInc*i));
+            actions.push(new Wait(this._timeStep));
+        }
+        //we add last step by hand to ensure float error as following:
+        //1. total duration must equal to actual duration
+        //2. final speed must be exact equal to given end speed
+        actions.push(new PWMSetDuty(this.pin, this._maxSpeed));
+        if(this._duration < this._timeStep)
+        actions.push(new Wait(this._duration));
+        else
+        actions.push(new Wait(this._duration - this._timeStep * (stepCnt - 1)));
+        return actions;
+    }
+
+    public run() {
+        console.log("PWMAction: PWMLinearAccel");
     }
 }
-class ProcessImage extends Action{
-    type: actionType = "processImage";
 
-    constructor(public readonly index : number,public readonly delta : number,public readonly ymult : number){
-        super()
+class Wait extends Action {
+    //variable
+    private readonly _duration!:number;
+    private wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
+
+    //getter
+    get duration() : number { return this._duration; }
+
+    //method
+    constructor(duration:number) {
+        super();
+        this._duration = duration;
+    }
+
+    public async run() {
+        console.log("Action: Wait");
+        await this.wait(this._duration);
     }
 }
-type CheckTimeType = "start" | "finish"
-class CheckTime extends Action{
-    type: actionType = "checkTime";
 
-    constructor(public checkTimeType:CheckTimeType){
-        super()
-    }
-}
-export {MoveLength,MovePosition,LEDEnable,Wait,Action,AutoHome,SetImage,CheckTime,LEDToggle,ProcessImage};
-export type { actionType,CheckTimeType }
+export {Action} // abstract class
+export {GPIOPin, PWMPin} // enum
+export {Wait, GPIOEnable, PWMEnable, PWMLinearAccel, PWMSetDuty, PWMSetPeriod} // actions

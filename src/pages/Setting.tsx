@@ -6,6 +6,7 @@ import styled from 'styled-components'
 
 import { useNavigate } from 'react-router-dom';
 import SetValue from '../components/SetValue';
+import { electron } from 'process';
 
 function Setting(){
 
@@ -18,22 +19,6 @@ function Setting(){
     const [modalVisible,setModalVisible] = useState<boolean>(false)
     const [totalTime, setTotalTime] = useState<number>(100);
     const [motorSpeed, setMotorSpeed] = useState<number>(1);
-    
-    useEffect(() => {
-        window.electronAPI.getProductInfoTW().then(
-            (value : string[]) => { //0:version,1:serial,2:wifi,3:ip,
-                setVersion(value[0])
-                setSerial(value[1])
-                setWifi(value[2])
-                if(value.length > 3){
-                    let a : string[] = []
-                    for (let i = 3; i < value.length; i++) {
-                        a.push(value[i])
-                    }
-                    setIp(a)
-                }
-            })
-    }, [modalVisible])
     
     return (
     <HomeArea>
@@ -62,7 +47,7 @@ function Setting(){
                         />
         </PageContainer>
         <PageContainer>
-            <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {navigate('/progress')}}>Start</ImageButton>
+            <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {window.electronAPI.washStartRM();}}>Start</ImageButton>
             <Button type="cancelBtn" color="gray" onClick={() => {navigate('/home')}}>Cancel</Button>        
         </PageContainer>
     </HomeArea>);

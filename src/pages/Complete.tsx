@@ -30,31 +30,6 @@ function Complete(){
 
     const { totalElapsedTime,error } = useParams()
 
-    useEffect(()=>{
-        const printInfoListener = window.electronAPI.onPrintInfoMR((event:IpcRendererEvent,state:string,material:string,filename:string,layerHeight:number
-            ,elaspsedTime:number,totalTime:number,progress:number)=>{
-            setFilename(filename)
-            setResin(material)
-            if(state === "error")
-                setIsError(true)
-        })
-        
-        window.electronAPI.requestPrintInfoRM()
-        if(totalElapsedTime){
-            let a = new Date(Number(totalElapsedTime))
-            setSpentTime(a.getMinutes() +"min " + a.getSeconds() + "sec")
-        }
-        if(error && error.toLocaleLowerCase() != "false"){
-            setIsError(true)
-            setErrorMessage(error)
-            seterrorModalVisible(true)
-        }
-
-        return ()=>{
-            window.electronAPI.removeListener(printInfoListener)
-        }
-    },[])
-
     return (
     <div>
         <FinishArea>
@@ -67,7 +42,7 @@ function Complete(){
         </FinishArea>
         <Footer>
                 <Button color='gray' type='small' onClick={() => {
-                    window.electronAPI.printCommandRM("printAgain")
+                    window.electronAPI.washCommandRM("printAgain")
                 }}> Wash again </Button>
                 <Button color='blue' type='small' onClick={() => {
                     navigate('/') }}> Close </Button> 

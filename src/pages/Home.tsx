@@ -20,23 +20,6 @@ function Home(){
     const [ip, setIp] = useState<string[]>([])
     const [modalVisible,setModalVisible] = useState<boolean>(false)
     
-    
-    useEffect(() => {
-        window.electronAPI.getProductInfoTW().then(
-            (value : string[]) => { //0:version,1:serial,2:wifi,3:ip,
-                setVersion(value[0])
-                setSerial(value[1])
-                setWifi(value[2])
-                if(value.length > 3){   
-                    let a : string[] = []
-                    for (let i = 3; i < value.length; i++) {
-                        a.push(value[i])
-                    }
-                    setIp(a)
-                }
-            })
-    }, [modalVisible])
-    
     return (
     <HomeArea>
         <HomeContainer>

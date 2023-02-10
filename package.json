@@ -2,7 +2,7 @@
   "main": "build/electron/main.js",
   "homepage": ".",
   "description": "washer hix",
-  "author": "JSH",
+  "author": "BakJH",
   "nodeGypRebuild": true,
   "build": {
     "extends": null,
@@ -24,7 +24,7 @@
       ]
     }
   },
-  "name": "waser",
+  "name": "washer",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -89,7 +89,7 @@
     "electron:worker:build": "tsc --build electron/worker",
     "electron:dev": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron .\"",
     "electron:dev:nosandbox": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && tsc -p electron -w --no-sandbox\" \"wait-on http://localhost:3000 && tsc -p electron && electron . --no-sandbox\"",
-    "electron:build": "rm -rf ./build-addon && mv ./build ./build-addon && yarn build && tsc -p electron && electron-builder build",
+    "electron:build": "rm -rf ./build && yarn build && tsc -p electron && electron-builder build",
     "electron:debug": "tsc -p electron",
     "electron-start-win": "set ELECTRON_START_URL=http://localhost:3000 && tsc -p electron     && electron .",
     "electron-start-win-watch": "set ELECTRON_START_URL=http://localhost:3000 && tsc -p electron -w ",
