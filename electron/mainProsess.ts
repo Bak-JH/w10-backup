@@ -26,8 +26,8 @@ export class Process
         }   
     }
 
-    public async run() {
-        await this._worker.run();
+    public run() {
+        this._worker.run();
     }
 
     /**
@@ -108,7 +108,7 @@ export class Process
             case "propeller1":
                 return GPIOPin.propeller1;
             default:
-                return GPIOPin.ERROR;
+                throw "GPIO Pin out of range";
         }
     }
 
@@ -119,7 +119,7 @@ export class Process
             case "propeller":
                 return PWMPin.propeller;
             default:
-                return PWMPin.ERROR;
+                throw "PWM Pin out of range";
         }
     }
 }

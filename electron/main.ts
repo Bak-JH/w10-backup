@@ -66,7 +66,7 @@ function createWindow() {
 
         });
     }
-    const mainProcess = new Process('/home/bakjh/Downloads/motor_test.hc');
+    const mainProcess = new Process('/home/bakjh/Downloads/wash_cycle.hc');
 
     ipcMain.on(WorkerCH.startRM, (event:IpcMainEvent) => {
         mainProcess.run();

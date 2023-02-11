@@ -31,7 +31,6 @@ export class WashWorker {
         this._progress = 0;
 
         for(const action of this._actions) {
-            console.log(action);
             await action.run();
         }
 
