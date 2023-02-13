@@ -1,6 +1,6 @@
 import { parentPort } from 'worker_threads';
 import { Stopwatch } from 'ts-stopwatch';
-import { Action } from './actions';
+import { Action } from '../actions';
 
 if(parentPort){
     parentPort.on("message",(value)=>{

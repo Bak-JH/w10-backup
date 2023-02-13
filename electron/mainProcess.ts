@@ -1,10 +1,8 @@
 import fs from 'fs'
-import { WashWorker } from './worker';
+import { WashWorker } from './worker/washWorker';
 import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel } from './actions';
 import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
-import { ipcMain, IpcMainEvent } from 'electron';
-import { WorkerCH } from './ipc/cmdChannels';
 
 export class Process
 {

@@ -32,17 +32,17 @@ abstract class Action {
 abstract class GPIOAction extends Action {
     //variable
     private readonly _pin!:GPIOPin 
-    protected _pinObj!:Gpio;
+    // protected _pinObj!:Gpio;
 
     //getter
     get pin() : GPIOPin { return this._pin; }
-    get pinObj() : Gpio { return this._pinObj; }
+    // get pinObj() : Gpio { return this._pinObj; }
 
     //method
     constructor(pin:GPIOPin) { 
         super(); 
         this._pin = pin; 
-        this._pinObj = new Gpio(pin, "out");
+        // this._pinObj = new Gpio(pin, "out");
     }
 }
 abstract class PWMAction extends Action {
@@ -72,7 +72,7 @@ class GPIOEnable extends GPIOAction {
         this._enable = enable; 
     }
     public run() {
-        this.pinObj.writeSync(toBinaryValue(this._enable));
+        // this.pinObj.writeSync(toBinaryValue(this._enable));
         console.log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
     }
 }
@@ -95,7 +95,7 @@ class PWMEnable extends PWMAction {
 
         if (PWMWorkers[this.pin] == null) {
             PWMWorkers[this.pin] = await new Worker(__dirname + '/worker/pwmWorker.js');
-            PWMWorkers[this.pin].postMessage(["setPin", this.pin])
+            await PWMWorkers[this.pin].postMessage(["setPin", this.pin])
         }
 
         if(!this.enable)
@@ -141,6 +141,7 @@ class PWMSetDuty extends PWMAction {
     public async run() {
         console.log("PWMAction: PWMDuty");
         await PWMWorkers[this.pin].postMessage(["setDuty", this.duty]);
+        await PWMWorkers[this.pin].on('message', () => {});
     }
 }
 

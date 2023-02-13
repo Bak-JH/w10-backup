@@ -17,6 +17,7 @@ function createWindow() {
         titleBarStyle: process.platform === "win32" ? "default":"hidden",
         webPreferences: {
           preload: path.join(__dirname, 'preload.js'),
+          sandbox: false,
         },
     });
     
@@ -47,7 +48,8 @@ function createWindow() {
         if (process.platform !== 'darwin') app.quit()
       });
 
-    if (!app.isPackaged) {
+    // if (!app.isPackaged) {
+        {
         mainWin.webContents.openDevTools();
 
         require('electron-reload')(__dirname, {
