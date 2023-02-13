@@ -48,8 +48,7 @@ function createWindow() {
         if (process.platform !== 'darwin') app.quit()
       });
 
-    // if (!app.isPackaged) {
-        {
+    if (!app.isPackaged) {
         mainWin.webContents.openDevTools();
 
         require('electron-reload')(__dirname, {
