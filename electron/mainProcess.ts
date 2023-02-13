@@ -3,7 +3,8 @@ import { WashWorker } from './worker';
 import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel } from './actions';
 import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
-import { log } from './logging';
+import { ipcMain, IpcMainEvent } from 'electron';
+import { WorkerCH } from './ipc/cmdChannels';
 
 export class Process
 {
@@ -25,8 +26,8 @@ export class Process
         }   
     }
 
-    public async run() {
-        await this._worker.run();
+    public run() {
+        this._worker.run();
     }
 
     /**
@@ -107,7 +108,7 @@ export class Process
             case "propeller1":
                 return GPIOPin.propeller1;
             default:
-                return GPIOPin.ERROR;
+                throw "GPIO Pin out of range";
         }
     }
 
@@ -118,7 +119,7 @@ export class Process
             case "propeller":
                 return PWMPin.propeller;
             default:
-                return PWMPin.ERROR;
+                throw "PWM Pin out of range";
         }
     }
 }

@@ -4,7 +4,7 @@ import path from 'path';
 import url from 'url';
 import isDev from 'electron-is-dev';
 
-import { Process } from './mainProsess';
+import { Process } from './mainProcess';
 import { WorkerCH } from './ipc/cmdChannels';
 
 function createWindow() {
