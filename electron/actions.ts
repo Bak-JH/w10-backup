@@ -1,4 +1,3 @@
-import { writeSync } from 'fs';
 import { BinaryValue, Gpio} from 'onoff';
 import { Worker } from 'worker_threads';
 
@@ -33,17 +32,17 @@ abstract class Action {
 abstract class GPIOAction extends Action {
     //variable
     private readonly _pin!:GPIOPin 
-    // protected _pinObj!:Gpio;
+    protected _pinObj!:Gpio;
 
     //getter
     get pin() : GPIOPin { return this._pin; }
-    // get pinObj() : Gpio { return this._pinObj; }
+    get pinObj() : Gpio { return this._pinObj; }
 
     //method
     constructor(pin:GPIOPin) { 
         super(); 
         this._pin = pin; 
-        // this._pinObj = new Gpio(pin, "out");
+        this._pinObj = new Gpio(pin, "out");
     }
 }
 abstract class PWMAction extends Action {
@@ -73,7 +72,7 @@ class GPIOEnable extends GPIOAction {
         this._enable = enable; 
     }
     public run() {
-        // this.pinObj.writeSync(toBinaryValue(this._enable));
+        this.pinObj.writeSync(toBinaryValue(this._enable));
         console.log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
     }
 }

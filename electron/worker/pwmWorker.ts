@@ -26,7 +26,7 @@ if(parentPort){
         {
             case WorkerMethod.SetPin:
                 pin = value[1];
-                // gpioObj = new Gpio(pin, 'out');
+                gpioObj = new Gpio(pin, 'out');
                 break;
             case WorkerMethod.SetPeriod:
                 period = value[1];
