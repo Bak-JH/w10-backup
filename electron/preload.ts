@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
-import { WorkerCH, ProductCH } from './commandChannels';
+import { WorkerCH, ProductCH } from './ipc/cmdChannels';
 let _id = 0
 
 interface EventListener{

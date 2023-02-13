@@ -3,8 +3,9 @@ import {app, BrowserWindow, ipcMain, IpcMainEvent, Menu, screen, session} from '
 import path from 'path';
 import url from 'url';
 import isDev from 'electron-is-dev';
-import { Process } from './mainProcess';
-import { WorkerCH } from './commandChannels';
+
+import { Process } from './mainProsess';
+import { WorkerCH } from './ipc/cmdChannels';
 
 function createWindow() {
 

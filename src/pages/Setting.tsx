@@ -6,12 +6,13 @@ import styled from 'styled-components'
 
 import { useNavigate } from 'react-router-dom';
 import SetValue from '../components/SetValue';
+import { electron } from 'process';
 
 function Setting(){
     const navigate = useNavigate();
     const [totalTime, setTotalTime] = useState<number>(100);
     const [motorSpeed, setMotorSpeed] = useState<number>(1);
-
+    
     return (
     <HomeArea>
         <PageContainer style={{'rowGap': '30px', 'width': 255}}>
@@ -39,7 +40,7 @@ function Setting(){
                         />
         </PageContainer>
         <PageContainer>
-            <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {window.electronAPI.washStartRM()}}>Start</ImageButton>
+            <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {window.electronAPI.washStartRM();}}>Start</ImageButton>
             <Button type="cancelBtn" color="gray" onClick={() => {navigate('/home')}}>Cancel</Button>        
         </PageContainer>
     </HomeArea>);
