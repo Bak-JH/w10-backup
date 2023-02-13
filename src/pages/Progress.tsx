@@ -25,11 +25,8 @@ function Progress(){
 
     const [progressValue, setProgressValue] = useState<number>(45)
     const [filename, setFilename] = useState<string>("")
-    const [material, setMaterial] = useState<string>("")
-    const [layerHeight, setLayerHeight] = useState<number>(0.1)
     const [totalTime, setTotalTime] = useState(0)
 
-    const [infoModalVisible,setInfoModalVisible] = useState<boolean>(false)
     const [quitModalVisible,setQuitModalVisible] = useState<boolean>(false)
     const [quitModalBtnEnable,setQuitModalBtnEnable] = useState<boolean>(true)
     const [quitWork,setQuitWork] = useState<boolean>(false)
@@ -102,7 +99,7 @@ function Progress(){
             </Footer>
             <Modal visible={quitModalVisible} btnEnable={quitModalBtnEnable} selectString="Quit" backString="Resume"
                 onBackClicked={() => setQuitModalVisible(false)}
-                onSelectClicked={() => {console.log('//complete/'+stopwatchRef.current.getTime()+"/"+isError.current); navigate('complete/'+stopwatchRef.current.getTime()+"/"+isError.current);}}
+                onSelectClicked={() => {console.log('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current); navigate('complete/'+stopwatchRef.current.getTime()+"/"+isError.current);}}
                 backVisible={!quitWork} selectVisible={!quitWork}>
                     <ModalNotice text={
                         quitWork ? "wait for movement" : "Are you sure to quit?"

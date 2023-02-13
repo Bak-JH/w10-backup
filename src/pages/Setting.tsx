@@ -9,14 +9,7 @@ import SetValue from '../components/SetValue';
 import { electron } from 'process';
 
 function Setting(){
-
-    const navigate = useNavigate()
-
-    const [version, setVersion] = useState<string>("")
-    const [serial, setSerial] = useState<string>("")
-    const [wifi, setWifi] = useState<string>("")
-    const [ip, setIp] = useState<string[]>([])
-    const [modalVisible,setModalVisible] = useState<boolean>(false)
+    const navigate = useNavigate();
     const [totalTime, setTotalTime] = useState<number>(100);
     const [motorSpeed, setMotorSpeed] = useState<number>(1);
     

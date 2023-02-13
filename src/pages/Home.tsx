@@ -11,15 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 
 function Home(){
-
     const navigate = useNavigate()
 
-    const [version, setVersion] = useState<string>("")
-    const [serial, setSerial] = useState<string>("")
-    const [wifi, setWifi] = useState<string>("")
-    const [ip, setIp] = useState<string[]>([])
-    const [modalVisible,setModalVisible] = useState<boolean>(false)
-    
     return (
     <HomeArea>
         <HomeContainer>

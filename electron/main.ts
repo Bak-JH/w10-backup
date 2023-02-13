@@ -8,22 +8,19 @@ import { Process } from './mainProsess';
 import { WorkerCH } from './ipc/cmdChannels';
 
 function createWindow() {
-    /*
-    * 넓이 1920에 높이 1080의 FHD 풀스크린 앱을 실행시킵니다.
-    * */
-  
+
+    // create pi window
     const mainWin = new BrowserWindow({
-        width:479,
+        width:480,
         height:320,
         backgroundColor: "#EEF5F9",
         titleBarStyle: process.platform === "win32" ? "default":"hidden",
-        // titleBarStyle: "default",
         webPreferences: {
           preload: path.join(__dirname, 'preload.js'),
         },
-        // disableAutoHideCursor: true
     });
     
+    // set menu item disable
     const template : Array<(Electron.MenuItem)> = []; 
     const menu = Menu.buildFromTemplate(template); 
     Menu.setApplicationMenu(menu);
@@ -45,7 +42,6 @@ function createWindow() {
     * */
 
     mainWin.loadURL(mainUrl);
-    // imgWin.loadURL(imageUrl);
     
     app.on('window-all-closed', () => {
         if (process.platform !== 'darwin') app.quit()
@@ -63,10 +59,10 @@ function createWindow() {
                 'electron' + (process.platform === "win32" ? ".cmd" : "")),
             forceHardReset: true,
             hardResetMethod: 'exit',
-
         });
     }
-    const mainProcess = new Process('/home/bakjh/Downloads/wash_cycle.hc');
+    
+    const mainProcess = new Process("./motor_test.hc");
 
     ipcMain.on(WorkerCH.startRM, (event:IpcMainEvent) => {
         mainProcess.run();
@@ -74,6 +70,5 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-    // ipcHandle()
     createWindow()
 })
