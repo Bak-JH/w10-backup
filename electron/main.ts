@@ -11,7 +11,7 @@ function createWindow() {
 
     // create pi window
     const mainWin = new BrowserWindow({
-        width:480,
+        width:479,
         height:320,
         backgroundColor: "#EEF5F9",
         titleBarStyle: process.platform === "win32" ? "default":"hidden",

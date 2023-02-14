@@ -32,17 +32,17 @@ abstract class Action {
 abstract class GPIOAction extends Action {
     //variable
     private readonly _pin!:GPIOPin 
-    // protected _pinObj!:Gpio;
+    protected _pinObj!:Gpio;
 
     //getter
     get pin() : GPIOPin { return this._pin; }
-    // get pinObj() : Gpio { return this._pinObj; }
+    get pinObj() : Gpio { return this._pinObj; }
 
     //method
     constructor(pin:GPIOPin) { 
         super(); 
         this._pin = pin; 
-        // this._pinObj = new Gpio(pin, "out");
+        this._pinObj = new Gpio(pin, "out");
     }
 }
 abstract class PWMAction extends Action {

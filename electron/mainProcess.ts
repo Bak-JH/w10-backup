@@ -7,7 +7,6 @@ import { exit } from 'process';
 export class Process
 {
     private _filePath: string | undefined;
-    private _commands: Array<string> = [];
     private _worker: WashWorker = new WashWorker();
 
     constructor(filePath: string) {
@@ -31,7 +30,7 @@ export class Process
     /**
     * name
     */
-    private async readCommandFile() {    
+    private readCommandFile() {    
         if(this._filePath) {
             //read file
             fs.readFile(this._filePath, (err, data) => {                
@@ -88,8 +87,6 @@ export class Process
                     }
                 }
             });
-            await wait(5000)
-            this._worker.run();
         }
     }
 
