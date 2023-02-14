@@ -72,7 +72,7 @@ class GPIOEnable extends GPIOAction {
         this._enable = enable; 
     }
     public run() {
-        // this.pinObj.writeSync(toBinaryValue(this._enable));
+        this.pinObj.writeSync(toBinaryValue(this._enable));
         console.log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
     }
 }
