@@ -96,7 +96,7 @@ class PWMEnable extends PWMAction {
 
         if (PWMWorkers[this.pin] == null) {
             PWMWorkers[this.pin] = await new Worker(__dirname + '/worker/pwmWorker.js');
-            await PWMWorkers[this.pin].postMessage(["setPin", this.pin])
+            PWMWorkers[this.pin].postMessage(["setPin", this.pin])
         }
 
         if(!this.enable)
@@ -120,9 +120,9 @@ class PWMSetPeriod extends PWMAction {
         this._period = period; 
     }
 
-    public async run() {
+    public run() {
         console.log("PWMAction: PWMSetPeriod");
-        await PWMWorkers[this.pin].postMessage(["setPeriod", this.period]);        
+        PWMWorkers[this.pin].postMessage(["setPeriod", this.period]);        
     }
 }
 
@@ -139,10 +139,9 @@ class PWMSetDuty extends PWMAction {
         if(duty < 0 || duty > 1) return;
         this._duty = duty; 
     }
-    public async run() {
+    public run() {
         console.log("PWMAction: PWMDuty");
-        await PWMWorkers[this.pin].postMessage(["setDuty", this.duty]);
-        await PWMWorkers[this.pin].on('message', () => {});
+        PWMWorkers[this.pin].postMessage(["setDuty", this.duty]);
     }
 }
 
@@ -166,11 +165,11 @@ class PWMLinearAccel extends PWMAction {
         this._duration = duration;
     }
 
-    public async run() {
+    public run() {
         console.log("PWMAction: PWMLinearAccel");
 
         PWMWorkers[this.pin].postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
-        await wait(this.duration);
+        return wait(this.duration);
     }
     
 }
@@ -188,9 +187,9 @@ class Wait extends Action {
         this._duration = duration;
     }
 
-    public async run() {
+    public run() {
         console.log("Action: Wait");        
-        await wait(this._duration);
+        return wait(this._duration);
     }
 }
 
