@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { WashWorker } from './worker/washWorker';
-import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel } from './actions';
+import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel, wait } from './actions';
 import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
 
@@ -31,7 +31,7 @@ export class Process
     /**
     * name
     */
-    private readCommandFile() {    
+    private async readCommandFile() {    
         if(this._filePath) {
             //read file
             fs.readFile(this._filePath, (err, data) => {                
@@ -88,6 +88,8 @@ export class Process
                     }
                 }
             });
+            await wait(5000)
+            this._worker.run();
         }
     }
 
