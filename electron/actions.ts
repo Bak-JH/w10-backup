@@ -19,6 +19,7 @@ interface IndexedWorkerArray {
 }
 
 const PWMWorkers:IndexedWorkerArray = [];
+const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
 
 function toBinaryValue(boolValue:boolean):BinaryValue {
     return boolValue ? 1 : 0;
@@ -145,6 +146,7 @@ class PWMSetDuty extends PWMAction {
     }
 }
 
+
 class PWMLinearAccel extends PWMAction {
     //variable
     private readonly _startSpeed!:number
@@ -167,12 +169,12 @@ class PWMLinearAccel extends PWMAction {
     public async run() {
         console.log("PWMAction: PWMLinearAccel");
 
-        await PWMWorkers[this.pin].postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
+        PWMWorkers[this.pin].postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
+        await wait(this.duration);
     }
     
 }
 
-const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
 class Wait extends Action {
     //variable
     private readonly _duration!:number;
