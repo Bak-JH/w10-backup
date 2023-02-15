@@ -14,11 +14,7 @@ enum PWMPin {
     propeller     = 13
 }
 
-interface IndexedWorkerArray {
-    [pinNumber:number]: Worker;
-}
-
-const PWMWorkers:IndexedWorkerArray = [];
+const PWMWorker = new Map<PWMPin, Worker>();
 const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
 
 function toBinaryValue(boolValue:boolean):BinaryValue {
@@ -27,7 +23,7 @@ function toBinaryValue(boolValue:boolean):BinaryValue {
 
 abstract class Action {
     //method
-    public abstract run():void;
+    public abstract run():Promise<unknown>;
 }
 
 abstract class GPIOAction extends Action {
@@ -72,7 +68,7 @@ class GPIOEnable extends GPIOAction {
         super(pin); 
         this._enable = enable; 
     }
-    public run() {
+    public async run() {
         this.pinObj.writeSync(toBinaryValue(this._enable));
         console.log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
     }
@@ -94,13 +90,13 @@ class PWMEnable extends PWMAction {
     public async run() {
         console.log("PWMAction: PWMEnable " + this.enable);
 
-        if (PWMWorkers[this.pin] == null) {
-            PWMWorkers[this.pin] = await new Worker(__dirname + '/worker/pwmWorker.js');
-            PWMWorkers[this.pin].postMessage(["setPin", this.pin])
+        if (await !PWMWorker.get(this.pin)) {
+            await PWMWorker.set(this.pin, await new Worker(__dirname + '/worker/pwmWorker.js'));
+            PWMWorker.get(this.pin)?.postMessage(["setPin", this.pin])
         }
 
         if(!this.enable)
-            PWMWorkers[this.pin].terminate();
+            PWMWorker.get(this.pin)?.terminate();
     }
 }
 
@@ -120,9 +116,9 @@ class PWMSetPeriod extends PWMAction {
         this._period = period; 
     }
 
-    public run() {
+    public async run() {
         console.log("PWMAction: PWMSetPeriod");
-        PWMWorkers[this.pin].postMessage(["setPeriod", this.period]);        
+        PWMWorker.get(this.pin)?.postMessage(["setPeriod", this.period]);
     }
 }
 
@@ -139,9 +135,16 @@ class PWMSetDuty extends PWMAction {
         if(duty < 0 || duty > 1) return;
         this._duty = duty; 
     }
-    public run() {
+    public async run() {
         console.log("PWMAction: PWMDuty");
-        PWMWorkers[this.pin].postMessage(["setDuty", this.duty]);
+        const task = new Promise ((resolve) => {
+            PWMWorker.get(this.pin)?.postMessage(["setDuty", this.duty]);
+            PWMWorker.get(this.pin)?.on('message', (message) => {
+                resolve(message);
+            });
+        });
+        
+        return task;
     }
 }
 
@@ -167,9 +170,14 @@ class PWMLinearAccel extends PWMAction {
 
     public run() {
         console.log("PWMAction: PWMLinearAccel");
+        const task = new Promise ((resolve) => {
+            PWMWorker.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
+            PWMWorker.get(this.pin)?.on('message', () => {
+                resolve(wait(this.duration));
+            });
+        });
 
-        PWMWorkers[this.pin].postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
-        return wait(this.duration);
+        return task;
     }
     
 }
@@ -188,7 +196,7 @@ class Wait extends Action {
     }
 
     public run() {
-        console.log("Action: Wait");        
+        console.log("Action: Wait");
         return wait(this._duration);
     }
 }

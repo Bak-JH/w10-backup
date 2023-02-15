@@ -12,6 +12,8 @@ enum WorkerMethod{
 const ON = 1;
 const OFF = 0;
 
+let breakLoop = false;
+
 let period:number = 0;
 let duty:number = 0;
 
@@ -30,27 +32,34 @@ if(parentPort){
                 break;
             case WorkerMethod.SetPeriod:
                 period = value[1];
+                breakLoop = true;
                 break;
             case WorkerMethod.SetDuty:
                 duty = value[1];
+                breakLoop = true;
                 break;
             case WorkerMethod.LinearAccel:
+                parentPort?.postMessage('starts accel');
+                breakLoop = true;
                 accelLoop(value[1], value[2], value[3]);
                 break;
         }
 
         console.log("pin: " + pin + " period: " + period + " duty: " + duty);
 
-        if(value[0] != WorkerMethod.LinearAccel &&
-            period > 0 && duty > 0 && duty < 1 && gpioObj)
+        if(value[0] != WorkerMethod.LinearAccel && period > 0 && duty > 0 && duty < 1 )//&& gpioObj)
+        {
+            parentPort?.postMessage('starts loop');
+            breakLoop = false;
             loop();
+        }
     })
 }
 
 async function loop() {
     console.log("pin " + pin + " start loop");
-
-    while(true)
+    
+    while(!breakLoop)
     {
         await wait(period * Math.abs(1 - duty));
         // console.log("1")
@@ -87,7 +96,8 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
         }
     }
 
-    await loop();
+    breakLoop = false;
+    loop();
 }
 
 export {WorkerMethod}
