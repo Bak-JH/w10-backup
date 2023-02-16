@@ -8,18 +8,20 @@ if(parentPort){
     })
 }
 
+export enum WorkingState{
+    Stop = "stop",
+    Pause = "pause",
+    Error = "error"
+}
+
 export class WashWorker {
     //variables
     private _actions : Array<Action> = [];
-    private _currentStep : number = 0;
     private _stopwatch : Stopwatch = new Stopwatch();
+    private _workingState : WorkingState = WorkingState.Stop;
 
     private _totalTime : number = 0;
     private _progress : number = 0;
-
-    //callback
-    private _onProgressCallback? : (progress:number) => void;
-    private _onSetTotalTime? : (time:number) => void;
 
     addAction(action:Action) {
         this._actions.push(action);
@@ -35,5 +37,22 @@ export class WashWorker {
         }
 
         console.log("done");
+    }
+
+    //callback
+    private _onProgressCallback? : (progress:number) => void;
+    private _onWorkingStateChangedCallback?: (state : WorkingState,message?:string) => void;
+    private _onSetTotalTime? : (time:number) => void;
+    
+    onProgressCB(callback: (progress:number) => void) {
+        this._onProgressCallback = callback;
+    }
+
+    onStateChangeCB(callback : (state : WorkingState,message?:string) => void){
+        this._onWorkingStateChangedCallback = callback;
+    }
+
+    onSetTotalTimeCB(callback : (time : number) => void){
+        this._onSetTotalTime = callback;
     }
 }

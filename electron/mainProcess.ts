@@ -1,30 +1,32 @@
 import fs from 'fs'
-import { WashWorker } from './worker/washWorker';
+import { WashWorker, WorkingState } from './worker/washWorker';
 import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel, wait } from './actions';
 import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
+import { BrowserWindow } from 'electron';
+import { WorkerCH } from './ipc/cmdChannels';
 
 export class Process
 {
     private _filePath: string | undefined;
     private _worker: WashWorker = new WashWorker();
+    private _totalTime: number = 0;
+    private _renderEvent: any;
 
-    constructor(filePath: string) {
+    constructor(mainWindow:BrowserWindow, filePath: string) {
         try {
+            this._renderEvent = mainWindow.webContents;
             console.log(filePath);
             if(fs.existsSync(filePath))
                 this._filePath = filePath;
             else throw "FileNotFound";
 
+            this.connectEvents(mainWindow);
             this.readCommandFile();
         } catch(err) {
             console.log(err);
             exit();
-        }   
-    }
-
-    public run() {
-        this._worker.run();
+        }
     }
 
     /**
@@ -89,12 +91,17 @@ export class Process
             });
         }
     }
+    
+    public async run() {
+        await this._worker.run();
+        this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
+    }
 
-    parseBoolean(input:string):boolean {
+    private parseBoolean(input:string):boolean {
         return input == "true";
     }
 
-    parseGPIO(input:string):GPIOPin {
+    private parseGPIO(input:string):GPIOPin {
         switch(input) {
             case "pump1":
                 return GPIOPin.pump1;
@@ -118,5 +125,9 @@ export class Process
             default:
                 throw "PWM Pin out of range";
         }
+    }
+
+    private connectEvents(mainWindow: BrowserWindow) {
+        this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
     }
 }

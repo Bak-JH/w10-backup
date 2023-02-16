@@ -42,7 +42,8 @@ function Complete(){
         </FinishArea>
         <Footer>
                 <Button color='gray' type='small' onClick={() => {
-                    window.electronAPI.washCommandRM("printAgain")
+                    window.electronAPI.washStartRM();
+                    navigate('/progress')
                 }}> Wash again </Button>
                 <Button color='blue' type='small' onClick={() => {
                     navigate('/') }}> Close </Button> 

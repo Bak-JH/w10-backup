@@ -39,14 +39,35 @@ function Progress(){
         const progressListener = window.electronAPI.onProgressMR((event:IpcRendererEvent, progress:number) => {
             setProgressValue(Number((progress*100).toFixed()))
         })
-        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,value:number)=>{
-            console.log(value)
-            setTotalTime(value)
+        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,time:number)=>{
+            console.log(time)
+            setTotalTime(time)
         })
-    },[])
+
+        const workingStateListener = window.electronAPI.onWorkingStateChangedMR((event:IpcRendererEvent,state:string,message?:string)=>{
+            if (state == "stop")
+            {
+                stopwatchRef.current.stop();
+                navigate('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current);
+            }
+        })
+
+        stopwatchRef.current.start();
+        const id = setInterval(() => {
+            setelaspedTime(stopwatchRef.current.getTime())
+        }, 100);
+
+        return () => {
+            window.electronAPI.removeListener(progressListener);
+            window.electronAPI.removeListener(setTotalTimeListener);
+            window.electronAPI.removeListener(workingStateListener);
+            
+            clearInterval(id);
+        }
+    },[]);
     
-    let timeC = totalTime - elaspedTime
-    let time = timeC < 0 ? new Date(-timeC) : new Date(timeC)
+    let timeC = totalTime - elaspedTime;
+    let time = timeC < 0 ? new Date(-timeC) : new Date(timeC);
 
     return (
         <div>

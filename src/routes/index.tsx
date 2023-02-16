@@ -15,7 +15,7 @@ const AppRoute = () => {
             }/>
             <Route path='/home' element={<Home/>}/>
             <Route path='/progress' element={<Progress/>}/>
-            <Route path='/progress/complete/:totalElapsedTime/:error' element={<Complete/>}/>
+            <Route path='/complete/:totalElapsedTime/:error' element={<Complete/>}/>
 
             <Route path='/setting' element={<Setting/>}/>
             

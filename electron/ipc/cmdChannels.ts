@@ -11,12 +11,15 @@ enum WorkerCH {
     shutdownRM          = "worker:shutdown",
     factoryResetRM          = "worker:factoryReset",
 
-    onProgressMR = "product:onProgress, callback:(event:IpcRendererEvent,progress: number) => void",
-    onSetTotalTimeMR = "product:onSetTotalTime, callback:(event:IpcRendererEvent,value:number)=>void",
+    onWorkingStateChangedMR = "worker:onWorkingStateChanged,state:string,message:string",
+    onProgressMR = "worker:onProgress,progress:number",
+    onSetTotalTimeMR = "worker:onSetTotalTimeMR",
 }
 
 enum ProductCH {
-    onShutDownEventMR = "product:onShutDownEvent, callback:(event:IpcRendererEvent) => void",
+    onShutDownEventMR = "product:onShutDownEvent",
+
+    shutDownRM = "product:onShutDown",
 }
 
 export {WorkerCH, ProductCH}
