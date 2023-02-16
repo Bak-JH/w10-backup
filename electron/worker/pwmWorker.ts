@@ -1,12 +1,14 @@
 import {parentPort} from 'worker_threads';
 import { wait } from '../actions';
 import { Gpio } from 'onoff';
+import { exit } from 'process';
 
 enum WorkerMethod{
     SetPin = "setPin",
     SetPeriod = "setPeriod",
     SetDuty = "setDuty",
-    LinearAccel = "linearAccel"
+    LinearAccel = "linearAccel",
+    Exit = "exit"
 }
 
 const ON = 1;
@@ -43,6 +45,8 @@ if(parentPort){
                 breakLoop = true;
                 accelLoop(value[1], value[2], value[3]);
                 break;
+	    case WorkerMethod.Exit:
+		breakLoop = true;
         }
 
         console.log("pin: " + pin + " period: " + period + " duty: " + duty);

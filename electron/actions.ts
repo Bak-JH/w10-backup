@@ -91,12 +91,13 @@ class PWMEnable extends PWMAction {
         console.log("PWMAction: PWMEnable " + this.enable);
 
         if (await !PWMWorker.get(this.pin)) {
-            await PWMWorker.set(this.pin, await new Worker(__dirname + '/worker/pwmWorker.js'));
+            console.log("new PWMWorker - " + this.pin);
+	    await PWMWorker.set(this.pin, await new Worker(__dirname + '/worker/pwmWorker.js'));
             PWMWorker.get(this.pin)?.postMessage(["setPin", this.pin])
         }
 
         if(!this.enable)
-            PWMWorker.get(this.pin)?.terminate();
+            PWMWorker.get(this.pin)?.postMessage(["exit"]);
     }
 }
 
