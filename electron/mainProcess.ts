@@ -3,7 +3,7 @@ import { WashWorker, WorkingState } from './worker/washWorker';
 import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel, wait } from './actions';
 import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, ipcMain, IpcMainEvent } from 'electron';
 import { WorkerCH } from './ipc/cmdChannels';
 
 export class Process
@@ -129,5 +129,12 @@ export class Process
 
     private connectEvents(mainWindow: BrowserWindow) {
         this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
+        ipcMain.on(WorkerCH.commandRM,(event:IpcMainEvent,cmd:string)=>{
+            switch(cmd)
+            {
+                case WorkingState.Stop:
+                    this._worker.stop();
+            }
+        });
     }
 }

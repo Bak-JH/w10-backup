@@ -120,7 +120,7 @@ function Progress(){
             </Footer>
             <Modal visible={quitModalVisible} btnEnable={quitModalBtnEnable} selectString="Quit" backString="Resume"
                 onBackClicked={() => setQuitModalVisible(false)}
-                onSelectClicked={() => {console.log('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current); navigate('complete/'+stopwatchRef.current.getTime()+"/"+isError.current);}}
+                onSelectClicked={() => { window.electronAPI.washCommandRM("stop"); navigate('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current); }}
                 backVisible={!quitWork} selectVisible={!quitWork}>
                     <ModalNotice text={
                         quitWork ? "wait for movement" : "Are you sure to quit?"

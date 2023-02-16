@@ -9,6 +9,7 @@ if(parentPort){
 }
 
 export enum WorkingState{
+    Start = "start",
     Stop = "stop",
     Pause = "pause",
     Error = "error"
@@ -18,7 +19,7 @@ export class WashWorker {
     //variables
     private _actions : Array<Action> = [];
     private _stopwatch : Stopwatch = new Stopwatch();
-    private _workingState : WorkingState = WorkingState.Stop;
+    private _workingState : WorkingState = WorkingState.Start;
 
     private _totalTime : number = 0;
     private _progress : number = 0;
@@ -27,16 +28,32 @@ export class WashWorker {
         this._actions.push(action);
     }
 
-    public async run() {
+    private reset() {
         this._stopwatch.reset()
         this._totalTime = 0;
         this._progress = 0;
+        this._workingState = WorkingState.Start;
+    }
+
+    public async run() {
+        this.reset();
 
         for(const action of this._actions) {
             await action.run();
+            if (this._workingState == WorkingState.Stop || 
+                this._workingState == WorkingState.Error)
+                    break;
         }
 
         console.log("done");
+    }
+
+    public async stop() {
+        this._workingState = WorkingState.Stop;
+        this._stopwatch.stop();
+
+        if(this._onWorkingStateChangedCallback) 
+            this._onWorkingStateChangedCallback(this._workingState);
     }
 
     //callback
