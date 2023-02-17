@@ -8,6 +8,8 @@ enum WorkerMethod{
     SetPeriod = "setPeriod",
     SetDuty = "setDuty",
     LinearAccel = "linearAccel",
+    Pause = "pause",
+    Resume = "resume",
     Exit = "exit"
 }
 
@@ -22,9 +24,16 @@ let duty:number = 0;
 let pin:number;
 let gpioObj:Gpio;
 
+type AccelSavedData = {
+    targetDuty:number,
+    lastTime:number
+}
+
+let accelData:AccelSavedData;
+
 if(parentPort){
     parentPort.on("message",(value)=>{
-        console.log("Worker: receive - ",value);
+        console.log("Worker: receive - " + value);
 
         switch(value[0])
         {
@@ -45,8 +54,15 @@ if(parentPort){
                 breakLoop = true;
                 accelLoop(value[1], value[2], value[3]);
                 break;
-	    case WorkerMethod.Exit:
-		breakLoop = true;
+            case WorkerMethod.Pause:
+                pause();
+                break;
+            case WorkerMethod.Resume:
+                resume();
+                break;
+	        case WorkerMethod.Exit:
+		        stop();
+                break;
         }
 
         console.log("pin: " + pin + " period: " + period + " duty: " + duty);
@@ -58,6 +74,23 @@ if(parentPort){
             loop();
         }
     })
+}
+
+function pause() {
+    breakLoop = true;
+}
+
+function resume() {
+    breakLoop = false;
+    if(accelData) accelLoop(duty, accelData.targetDuty, accelData.lastTime);
+    else loop();
+}
+
+function stop() {
+    breakLoop = true;
+    gpioObj.writeSync(OFF);
+    gpioObj.unexport();
+    exit();
 }
 
 async function loop() {
@@ -80,11 +113,19 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
     const timeStep = 1000;
     const stepCnt = Math.ceil(totalTime / timeStep);
     const spdInc = (targetDuty - startDuty)/ stepCnt;
-    duty = startDuty;
     
+    duty = startDuty;
+    breakLoop = false;
 
     for(let step = 0; step < stepCnt; ++step)
     {
+        if(breakLoop)
+        {
+            accelData.targetDuty = targetDuty;
+            accelData.lastTime = stepCnt - step * timeStep;
+            break;
+        }
+
         for (let loopCount = 0; loopCount < timeStep / period; ++loopCount) {
             await wait(period * Math.abs(1 - duty));
             // console.log("1")
@@ -100,8 +141,7 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
         }
     }
 
-    breakLoop = false;
-    loop();
+    if(!breakLoop) loop();
 }
 
 export {WorkerMethod}

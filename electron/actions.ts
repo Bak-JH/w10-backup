@@ -41,6 +41,10 @@ abstract class GPIOAction extends Action {
         this._pin = pin; 
         this._pinObj = new Gpio(pin, "out");
     }
+    public stop() {
+        // this._pinObj.writeSync(0);
+        // this._pinObj.unexport();
+    }
 }
 abstract class PWMAction extends Action {
     //variable
@@ -53,6 +57,10 @@ abstract class PWMAction extends Action {
     constructor(pin:PWMPin) {
         super(); 
         this._pin = pin; 
+    }
+
+    public stop() {
+        PWMWorker.get(this.pin)?.postMessage("stop");
     }
 }
 
@@ -97,7 +105,7 @@ class PWMEnable extends PWMAction {
         }
 
         if(!this.enable)
-            PWMWorker.get(this.pin)?.postMessage(["exit"]);
+            PWMWorker.get(this.pin)?.postMessage("stop");
     }
 }
 

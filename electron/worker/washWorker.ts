@@ -40,9 +40,11 @@ export class WashWorker {
 
         for(const action of this._actions) {
             await action.run();
-            if (this._workingState == WorkingState.Stop || 
-                this._workingState == WorkingState.Error)
-                    break;
+            if (this._workingState == WorkingState.Stop || this._workingState == WorkingState.Error)
+            {
+                action.stop();
+                break;
+            }
         }
 
         console.log("done");
