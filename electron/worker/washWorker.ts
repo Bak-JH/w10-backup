@@ -42,7 +42,7 @@ export class WashWorker {
     public async run() {
         this.reset();
 
-        for(this._actionIdx = 0; this._actionIdx < this._actions.length; ++this._actionIdx) {
+        for(this._actionIdx = 0; this._actionIdx < this._actions.length; this._actionIdx++) {
             try {
                 await this._actions[this._actionIdx].run();
             } catch (e) {

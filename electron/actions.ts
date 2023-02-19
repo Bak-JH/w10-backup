@@ -69,7 +69,7 @@ abstract class GPIOAction extends Action {
 }
 abstract class PWMAction extends Action {
     //variable
-    private readonly _pin!:PWMPin
+    private readonly _pin!:PWMPin;
 
     //getter
     get pin () : PWMPin { return this._pin; }
@@ -78,6 +78,10 @@ abstract class PWMAction extends Action {
     constructor(pin:PWMPin) {
         super(); 
         this._pin = pin; 
+
+        PWMWorker.get(this.pin)?.on('message', (message) => {
+            console.log(message);
+        });
     }
 
     public async run() {
@@ -92,16 +96,9 @@ abstract class PWMAction extends Action {
         return initPromise;
     }
 
-    public async stop() {
-        const workerStop = new Promise ((resolve) => {
-            PWMWorker.get(this.pin)?.postMessage(["stop"]);
-            PWMWorker.get(this.pin)?.on('message', (message) => {
-                console.log(message);
-                resolve("done");
-            });
-        });
-
-        await workerStop;
+    public stop() {
+        PWMWorker.get(this.pin)?.postMessage(["stop"]);
+        super.stop();
     }
 
     public resume() {
@@ -157,13 +154,8 @@ class PWMEnable extends PWMAction {
         this._promise = new AbortablePromise((resolve) => {
             console.log("PWMAction: PWMEnable " + this.enable);
 
-            if(this.enable)
-                PWMWorker.get(this.pin)?.postMessage(["setPin", this.pin]);
-            else 
-            {
-                PWMWorker.get(this.pin)?.postMessage(["stop"]);
-                PWMWorker.delete(this.pin);
-            }
+            if(this.enable) PWMWorker.get(this.pin)?.postMessage(["setPin", this.pin]);
+            else  PWMWorker.get(this.pin)?.postMessage(["stop"]);
 
             resolve("done");
         });
@@ -276,7 +268,7 @@ class PWMLinearAccel extends PWMAction {
         return this._promise;
     }
     
-    public async stop() {
+    public stop() {
         console.log("Stopped: PWMLinearAccel");
         this._stopWatch.stop();
         
