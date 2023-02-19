@@ -34,7 +34,7 @@ if(parentPort){
         {
             case WorkerMethod.SetPin:
                 pin = value[1];
-                gpioObj = new Gpio(pin, 'out');
+                if (!gpioObj) gpioObj = new Gpio(pin, 'out');
                 break;
             case WorkerMethod.SetPeriod:
                 period = value[1];
@@ -83,10 +83,11 @@ if(parentPort){
 function stop() {
     console.log("stop called");
     breakLoop = true;
-    parentPort?.postMessage(['last accel data', stopInAccelLoop, period, duty]);
     gpioObj.writeSync(OFF);
     duty = 0;
     period = 0;
+
+    parentPort?.postMessage(['last accel data', stopInAccelLoop, period, duty]);
 }
 
 async function loop() {
@@ -113,16 +114,10 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
     
     duty = startDuty;
     breakLoop = false;
+    stopInAccelLoop = true;
 
-    for(let step = 0; step < stepCnt; ++step)
+    for(let step = 0; step < stepCnt && !breakLoop; ++step)
     {
-        if(breakLoop)
-        {
-            stopInAccelLoop = true;
-            return;
-            break;
-        }
-
         for (let loopCount = 0; loopCount < timeStep / period; ++loopCount) {
             await wait(period * Math.abs(1 - duty));
             // console.log("1")

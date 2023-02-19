@@ -92,9 +92,16 @@ abstract class PWMAction extends Action {
         return initPromise;
     }
 
-    public stop() {
-        super.stop();
-        PWMWorker.clear();
+    public async stop() {
+        const workerStop = new Promise ((resolve) => {
+            PWMWorker.get(this.pin)?.postMessage(["stop"]);
+            PWMWorker.get(this.pin)?.on('message', (message) => {
+                console.log(message);
+                resolve("done");
+            });
+        });
+
+        await workerStop;
     }
 
     public resume() {
@@ -273,17 +280,6 @@ class PWMLinearAccel extends PWMAction {
         console.log("Stopped: PWMLinearAccel");
         this._stopWatch.stop();
         
-        // const workerStop = new Promise ((resolve) => {
-        //     const tempWorker = PWMWorker.get(this.pin);
-        //     PWMWorker.delete(this.pin);
-        //     tempWorker?.postMessage(["stop"]);
-        //     tempWorker?.on('message', (message) => {
-        //         console.log(message);
-        //         resolve("done");
-        //     });
-        // });
-
-        // await workerStop;
         super.stop();
     }
 
