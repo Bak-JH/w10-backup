@@ -92,7 +92,7 @@ abstract class PWMAction extends Action {
                 console.log("new PWMWorker - " + this.pin);
                 PWMWorker.set(this.pin, new Worker(__dirname + '/worker/pwmWorker.js'));
             }
-            resolve();
+            resolve("done");
         });
 
         return initPromise;
@@ -237,7 +237,6 @@ class PWMLinearAccel extends PWMAction {
 
     private readonly wait = (timeToDelay:number) => new AbortablePromise((resolve) => setTimeout(resolve, timeToDelay));
     private readonly workerPromise = new Promise ((resolve) => {
-        PWMWorker.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
         PWMWorker.get(this.pin)?.on('message', () => {
             this._stopWatch.start();
             resolve("done");
@@ -260,7 +259,9 @@ class PWMLinearAccel extends PWMAction {
     public async run() {
         await super.run();
         console.log("PWMAction: PWMLinearAccel");
+
         this._stopWatch.reset();
+        PWMWorker.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
         await this.workerPromise;
         this._promise = this.wait(this.duration);
         
