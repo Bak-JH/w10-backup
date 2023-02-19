@@ -150,7 +150,9 @@ class PWMEnable extends PWMAction {
         this._promise = new AbortablePromise((resolve) => {
             console.log("PWMAction: PWMEnable " + this.enable);
 
-            if(!this.enable)
+            if(this.enable)
+                PWMWorker.get(this.pin)?.postMessage(["setPin", this.pin]);
+            else 
             {
                 PWMWorker.get(this.pin)?.postMessage(["stop"]);
                 PWMWorker.delete(this.pin);
