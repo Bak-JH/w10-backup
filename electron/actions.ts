@@ -273,15 +273,17 @@ class PWMLinearAccel extends PWMAction {
         console.log("Stopped: PWMLinearAccel");
         this._stopWatch.stop();
         
-        const workerStop = new Promise ((resolve) => {
-            PWMWorker.get(this.pin)?.postMessage(["stop"]);
-            PWMWorker.get(this.pin)?.on('message', (message) => {
-                console.log(message);
-                resolve("done");
-            });
-        });
+        // const workerStop = new Promise ((resolve) => {
+        //     const tempWorker = PWMWorker.get(this.pin);
+        //     PWMWorker.delete(this.pin);
+        //     tempWorker?.postMessage(["stop"]);
+        //     tempWorker?.on('message', (message) => {
+        //         console.log(message);
+        //         resolve("done");
+        //     });
+        // });
 
-        await workerStop;
+        // await workerStop;
         super.stop();
     }
 
