@@ -41,7 +41,11 @@ abstract class Action {
     public abstract run():Promise<unknown>;
     public stop():void {
         disableAllPins();
-        this._promise.abort();
+        try {
+            this._promise.abort();
+        } catch(err) {
+            console.log(err);
+        }
     }
     public pause():void {
         this.stop();
@@ -70,12 +74,12 @@ abstract class GPIOAction extends Action {
 abstract class PWMAction extends Action {
     //variable
     private readonly _pin!:PWMPin;
-    private readonly _stopPromise = new Promise ((resolve) => {
-            PWMWorker.get(this._pin)?.on('message', (message) => {
-            console.log(message);
-            resolve(message);
-        });
-    });
+    // public _stopPromise = new Promise ((resolve) => {
+    //     PWMWorker.get(this._pin)?.on('message', (message) => {
+    //         console.log(message);
+    //         resolve("done");
+    //     });
+    // });
 
     //getter
     get pin () : PWMPin { return this._pin; }
@@ -87,7 +91,7 @@ abstract class PWMAction extends Action {
     }
 
     public async run() {
-        const initPromise = new AbortablePromise((resolve) => {
+        this._promise = new AbortablePromise((resolve) => {
             if (!PWMWorker.get(this.pin)) {
                 console.log("new PWMWorker - " + this.pin);
                 PWMWorker.set(this.pin, new Worker(__dirname + '/worker/pwmWorker.js'));
@@ -95,12 +99,14 @@ abstract class PWMAction extends Action {
             resolve("done");
         });
 
-        return initPromise;
+        return this._promise;
     }
 
-    public async stop() {
+    public stop() {
         PWMWorker.get(this.pin)?.postMessage(["stop"]);
-        await this._stopPromise;
+        PWMWorker.get(this.pin)?.on('message', (message) => {
+            console.log(message);
+        });
         super.stop();
     }
 
@@ -170,7 +176,6 @@ class PWMEnable extends PWMAction {
 class PWMSetPeriod extends PWMAction {
     //variable
     private readonly _period!:number;
-    private _stopPWM:boolean = false
 
     //getter
     get period() : number { return this._period; }
