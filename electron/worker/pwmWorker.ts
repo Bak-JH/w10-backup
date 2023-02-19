@@ -1,5 +1,4 @@
 import {parentPort} from 'worker_threads';
-import { wait } from '../actions';
 import { Gpio } from 'onoff';
 import { exit } from 'process';
 
@@ -26,11 +25,6 @@ let pin:number;
 let gpioObj:Gpio;
 
 const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
-    targetDuty:number,
-    lastTime:number
-}
-
-let accelData:AccelSavedData;
 
 if(parentPort){
     parentPort.on("message",(value)=>{
