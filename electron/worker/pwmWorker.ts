@@ -83,9 +83,10 @@ if(parentPort){
 function stop() {
     console.log("stop called");
     breakLoop = true;
+    parentPort?.postMessage(['last accel data', stopInAccelLoop, period, duty]);
     gpioObj.writeSync(OFF);
-    gpioObj.unexport();
-    exit();
+    duty = 0;
+    period = 0;
 }
 
 async function loop() {
