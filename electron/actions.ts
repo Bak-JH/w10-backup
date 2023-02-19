@@ -1,5 +1,9 @@
 import { BinaryValue, Gpio} from 'onoff';
 import { Worker } from 'worker_threads';
+import { log } from './logging'
+import { Stopwatch } from 'ts-stopwatch';
+import { AbortablePromise } from 'simple-abortable-promise';
+import { resolve } from 'path';
 
 enum GPIOPin {
     pump1         = 6,
@@ -14,16 +18,37 @@ enum PWMPin {
     propeller     = 13
 }
 
+const ActivePins:Array<GPIOPin | PWMPin> = [];
 const PWMWorker = new Map<PWMPin, Worker>();
-const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
 
+function disableAllPins() {
+    for(const pin of ActivePins)
+    {
+        const gpio = new Gpio(pin, "out");
+        gpio.writeSync(0);
+    }
+}
+  
 function toBinaryValue(boolValue:boolean):BinaryValue {
     return boolValue ? 1 : 0;
 }
 
 abstract class Action {
+    //variable
+    protected _promise!:AbortablePromise<unknown>;
+
     //method
     public abstract run():Promise<unknown>;
+    public stop():void {
+        disableAllPins();
+        this._promise.abort();
+    }
+    public pause():void {
+        this.stop();
+    }
+    public resume():Promise<unknown> {
+        return this.run();
+    }
 }
 
 abstract class GPIOAction extends Action {
@@ -41,10 +66,6 @@ abstract class GPIOAction extends Action {
         this._pin = pin; 
         this._pinObj = new Gpio(pin, "out");
     }
-    public stop() {
-        // this._pinObj.writeSync(0);
-        // this._pinObj.unexport();
-    }
 }
 abstract class PWMAction extends Action {
     //variable
@@ -59,8 +80,30 @@ abstract class PWMAction extends Action {
         this._pin = pin; 
     }
 
+    public async run() {
+        const initPromise = new AbortablePromise((resolve) => {
+            if (!PWMWorker.get(this.pin)) {
+                console.log("new PWMWorker - " + this.pin);
+                PWMWorker.set(this.pin, new Worker(__dirname + '/worker/pwmWorker.js'));
+            }
+            resolve();
+        });
+
+        return initPromise;
+    }
+
     public stop() {
-        PWMWorker.get(this.pin)?.postMessage("stop");
+        super.stop();
+        PWMWorker.clear();
+    }
+
+    public resume() {
+        this._promise = new AbortablePromise ((resolve) => {
+            PWMWorker.get(this.pin)?.postMessage(["pause"]);
+            resolve("done");
+        });
+
+        return this._promise;
     }
 }
 
@@ -76,9 +119,15 @@ class GPIOEnable extends GPIOAction {
         super(pin); 
         this._enable = enable; 
     }
-    public async run() {
-        this.pinObj.writeSync(toBinaryValue(this._enable));
-        console.log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
+    public run() {
+        this._promise = new AbortablePromise((resolve) => {
+            this.pinObj.writeSync(toBinaryValue(this._enable));
+            ActivePins.push(this.pin);
+            console.log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
+            resolve("done");
+        });
+
+        return this._promise;
     }
 }
 
@@ -96,16 +145,21 @@ class PWMEnable extends PWMAction {
     }
 
     public async run() {
-        console.log("PWMAction: PWMEnable " + this.enable);
+        await super.run();
 
-        if (await !PWMWorker.get(this.pin)) {
-            console.log("new PWMWorker - " + this.pin);
-	    await PWMWorker.set(this.pin, await new Worker(__dirname + '/worker/pwmWorker.js'));
-            PWMWorker.get(this.pin)?.postMessage(["setPin", this.pin])
-        }
+        this._promise = new AbortablePromise((resolve) => {
+            console.log("PWMAction: PWMEnable " + this.enable);
 
-        if(!this.enable)
-            PWMWorker.get(this.pin)?.postMessage("stop");
+            if(!this.enable)
+            {
+                PWMWorker.get(this.pin)?.postMessage(["stop"]);
+                PWMWorker.delete(this.pin);
+            }
+
+            resolve("done");
+        });
+
+        return this._promise;
     }
 }
 
@@ -126,8 +180,16 @@ class PWMSetPeriod extends PWMAction {
     }
 
     public async run() {
-        console.log("PWMAction: PWMSetPeriod");
-        PWMWorker.get(this.pin)?.postMessage(["setPeriod", this.period]);
+        await super.run();
+
+        this._promise = new AbortablePromise((resolve) => {
+            console.log("PWMAction: PWMSetPeriod");
+
+            PWMWorker.get(this.pin)?.postMessage(["setPeriod", this.period]);
+            resolve("done");
+        });
+
+        return this._promise;
     }
 }
 
@@ -145,15 +207,18 @@ class PWMSetDuty extends PWMAction {
         this._duty = duty; 
     }
     public async run() {
-        console.log("PWMAction: PWMDuty");
-        const task = new Promise ((resolve) => {
+        await super.run();
+        
+        this._promise = new AbortablePromise ((resolve) => {
+            console.log("PWMAction: PWMDuty");
+                
             PWMWorker.get(this.pin)?.postMessage(["setDuty", this.duty]);
             PWMWorker.get(this.pin)?.on('message', (message) => {
                 resolve(message);
             });
         });
         
-        return task;
+        return this._promise;
     }
 }
 
@@ -162,7 +227,12 @@ class PWMLinearAccel extends PWMAction {
     //variable
     private readonly _startSpeed!:number
     private readonly _targetSpeed!:number
-    private readonly _duration!:number;
+    private _duration!:number;
+    private _resumeDuration?:number;
+    private readonly _stopWatch = new Stopwatch();
+
+    private readonly wait = (timeToDelay:number) => new AbortablePromise((resolve) => setTimeout(resolve, timeToDelay));
+
 
     get startSpeed() : number { return this._startSpeed; }
     get targetSpeed() : number { return this._targetSpeed; }
@@ -172,28 +242,60 @@ class PWMLinearAccel extends PWMAction {
     constructor(pin:PWMPin, startSpeed:number, targetSpeed:number, duration:number) {
         super(pin);
 
-        this._startSpeed = startSpeed;
+        this._startSpeed = startSpeed; 
         this._targetSpeed = targetSpeed;
         this._duration = duration;
     }
 
-    public run() {
+    public async run() {
+        await super.run();
         console.log("PWMAction: PWMLinearAccel");
-        const task = new Promise ((resolve) => {
+        this._stopWatch.reset();
+
+        const workerPromise = new Promise ((resolve) => {
             PWMWorker.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
             PWMWorker.get(this.pin)?.on('message', () => {
-                resolve(wait(this.duration));
+                this._stopWatch.start();
+                resolve("done");
             });
         });
 
-        return task;
+        await workerPromise;
+        this._promise = this.wait(this.duration);
+        
+
+        return this._promise;
     }
     
+    public async stop() {
+        console.log("Stopped: PWMLinearAccel");
+        this._stopWatch.stop();
+        
+        const workerStop = new Promise ((resolve) => {
+            PWMWorker.get(this.pin)?.postMessage(["stop"]);
+            PWMWorker.get(this.pin)?.on('message', (message) => {
+                console.log(message);
+                resolve("done");
+            });
+        });
+
+        await workerStop;
+        super.stop();
+    }
+
+    public resume() {
+        return new AbortablePromise((resolve) => {
+            PWMWorker.get(this.pin)?.postMessage(["resume", this.targetSpeed, this.duration - this._stopWatch.getTime()])
+        });
+    }
 }
 
 class Wait extends Action {
     //variable
-    private readonly _duration!:number;
+    private _duration!:number;
+    private readonly _stopWatch = new Stopwatch();
+
+    private readonly wait = (timeToDelay:number) => new AbortablePromise((resolve) => setTimeout(resolve, timeToDelay));
 
     //getter
     get duration() : number { return this._duration; }
@@ -205,12 +307,20 @@ class Wait extends Action {
     }
 
     public run() {
-        console.log("Action: Wait");
-        return wait(this._duration);
+        console.log("Action: Wait - " + this.duration);
+        this._stopWatch.reset();
+        this._promise = this.wait(this.duration - this._stopWatch.getTime());
+        this._stopWatch.start();
+        return this._promise;
+    }
+
+    public stop() {
+        this._stopWatch.stop();
+        super.stop();
     }
 }
 
 export {Action} // abstract class
 export {GPIOPin, PWMPin} // enum
 export {Wait, GPIOEnable, PWMEnable, PWMLinearAccel, PWMSetDuty, PWMSetPeriod} // actions
-export {wait} // function
+export {ActivePins} // const

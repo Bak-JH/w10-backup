@@ -50,6 +50,10 @@ function Progress(){
                 stopwatchRef.current.stop();
                 navigate('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current);
             }
+            else if (state == "pause")
+                stopwatchRef.current.stop();
+            else if (state == "resume")
+                stopwatchRef.current.start();
         })
 
         stopwatchRef.current.start();

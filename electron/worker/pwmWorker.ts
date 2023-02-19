@@ -10,13 +10,14 @@ enum WorkerMethod{
     LinearAccel = "linearAccel",
     Pause = "pause",
     Resume = "resume",
-    Exit = "exit"
+    Stop = "stop"
 }
 
 const ON = 1;
 const OFF = 0;
 
 let breakLoop = false;
+let stopInAccelLoop = false;
 
 let period:number = 0;
 let duty:number = 0;
@@ -24,7 +25,7 @@ let duty:number = 0;
 let pin:number;
 let gpioObj:Gpio;
 
-type AccelSavedData = {
+const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
     targetDuty:number,
     lastTime:number
 }
@@ -54,20 +55,23 @@ if(parentPort){
                 breakLoop = true;
                 accelLoop(value[1], value[2], value[3]);
                 break;
+	        case WorkerMethod.Stop:
+		        stop();
+                break;
             case WorkerMethod.Pause:
-                pause();
+                breakLoop = true;
                 break;
             case WorkerMethod.Resume:
-                resume();
-                break;
-	        case WorkerMethod.Exit:
-		        stop();
+                breakLoop = false;
+                if(stopInAccelLoop) accelLoop(duty, value[1], value[2]);
+                else loop();
                 break;
         }
 
         console.log("pin: " + pin + " period: " + period + " duty: " + duty);
 
-        if(value[0] != WorkerMethod.LinearAccel && period > 0 && duty > 0 && duty < 1 )//&& gpioObj)
+        if(value[0] != WorkerMethod.LinearAccel && value[0] != WorkerMethod.Stop &&
+            period > 0 && duty > 0 && duty < 1 && gpioObj)
         {
             parentPort?.postMessage('starts loop');
             breakLoop = false;
@@ -76,17 +80,18 @@ if(parentPort){
     })
 }
 
-function pause() {
-    breakLoop = true;
-}
-
-function resume() {
+// function resume(isAccelStopped: boolean, lastDuty?:number, lastTargetDuty?: number, lastTime?: number) {
+//     breakLoop = false;
+//     if(isAccelStopped) accelLoop(duty,dsfljk, lastTime);
+//     else loop();
+// }
     breakLoop = false;
     if(accelData) accelLoop(duty, accelData.targetDuty, accelData.lastTime);
     else loop();
 }
 
 function stop() {
+    console.log("stop called");
     breakLoop = true;
     gpioObj.writeSync(OFF);
     gpioObj.unexport();
@@ -95,7 +100,8 @@ function stop() {
 
 async function loop() {
     console.log("pin " + pin + " start loop");
-    
+    stopInAccelLoop = false;
+
     while(!breakLoop)
     {
         await wait(period * Math.abs(1 - duty));
@@ -121,8 +127,8 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
     {
         if(breakLoop)
         {
-            accelData.targetDuty = targetDuty;
-            accelData.lastTime = stepCnt - step * timeStep;
+            stopInAccelLoop = true;
+            return;
             break;
         }
 

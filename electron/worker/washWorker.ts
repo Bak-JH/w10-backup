@@ -12,17 +12,21 @@ export enum WorkingState{
     Start = "start",
     Stop = "stop",
     Pause = "pause",
+    Resume = "resume",
     Error = "error"
 }
 
 export class WashWorker {
     //variables
-    private _actions : Array<Action> = [];
-    private _stopwatch : Stopwatch = new Stopwatch();
-    private _workingState : WorkingState = WorkingState.Start;
+    private _actions: Array<Action> = [];
+    private _stopwatch: Stopwatch = new Stopwatch();
+    private _workingState: WorkingState = WorkingState.Start;
 
+    private _actionIdx: number = 0;
     private _totalTime : number = 0;
     private _progress : number = 0;
+
+    get workingState() { return this._workingState; }
 
     addAction(action:Action) {
         this._actions.push(action);
@@ -38,11 +42,10 @@ export class WashWorker {
     public async run() {
         this.reset();
 
-        for(const action of this._actions) {
-            await action.run();
-            if (this._workingState == WorkingState.Stop || this._workingState == WorkingState.Error)
-            {
-                action.stop();
+        for(this._actionIdx = 0; this._actionIdx < this._actions.length; ++this._actionIdx) {
+            try {
+                await this._actions[this._actionIdx].run();
+            } catch (e) {
                 break;
             }
         }
@@ -50,12 +53,38 @@ export class WashWorker {
         console.log("done");
     }
 
-    public async stop() {
+    public stop() {
         this._workingState = WorkingState.Stop;
         this._stopwatch.stop();
+        this._actions[this._actionIdx].stop();
 
         if(this._onWorkingStateChangedCallback) 
             this._onWorkingStateChangedCallback(this._workingState);
+    }
+
+    public pause() {
+        this._workingState = WorkingState.Pause;
+        this._stopwatch.stop();
+        this._actions[this._actionIdx].pause();
+
+        if(this._onWorkingStateChangedCallback) 
+            this._onWorkingStateChangedCallback(this._workingState);
+    }
+
+    public async resume() {
+        this._workingState = WorkingState.Start;
+        this._stopwatch.start();
+
+        if(this._onWorkingStateChangedCallback) 
+            this._onWorkingStateChangedCallback(this._workingState);
+
+        for(this._actionIdx = 0; this._actionIdx < this._actions.length; ++this._actionIdx) {
+            try {
+                await this._actions[this._actionIdx].resume();
+            } catch (e) {
+                break;
+            }
+        }
     }
 
     //callback

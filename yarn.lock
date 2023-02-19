@@ -9713,6 +9713,13 @@ signal-exit@^3.0.2, signal-exit@^3.0.3, signal-exit@^3.0.7:
   resolved "https://registry.npmjs.org/signal-exit/-/signal-exit-3.0.7.tgz"
   integrity sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==
 
+simple-abortable-promise@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/simple-abortable-promise/-/simple-abortable-promise-1.1.1.tgz#9b11f33f3d3e420bd2f36c4b994551ca47c59a74"
+  integrity sha512-ekE07nRUPZbwSOYdHdmvV4eZBY6NAKvYv469zD1zDr4EXK7KL+FYhg2eg8UpN8Xe41lW091zJy9teo/G6oeTyw==
+  dependencies:
+    abortcontroller-polyfill "^1.4.0"
+
 sisteransi@^1.0.5:
   version "1.0.5"
   resolved "https://registry.npmjs.org/sisteransi/-/sisteransi-1.0.5.tgz"

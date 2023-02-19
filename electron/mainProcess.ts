@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { WashWorker, WorkingState } from './worker/washWorker';
-import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel, wait } from './actions';
+import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel } from './actions';
 import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
 import { BrowserWindow, ipcMain, IpcMainEvent } from 'electron';
@@ -48,8 +48,11 @@ export class Process
 
                     switch(command) {
                         case "Wait":
+                        case "wait":
                             this._worker.addAction(new Wait(parseInt(pin)));
                             break;
+                        case "gpioenable":
+                        case "gpioEnable":
                         case "GPIOEnable":
                             try {
                                 this._worker.addAction(new GPIOEnable(this.parseGPIO(pin), this.parseBoolean(tokens[2])));
@@ -57,6 +60,8 @@ export class Process
                                 console.log(error);
                             }
                             break;
+                        case "pwmenable":
+                        case "pwmEnable":
                         case "PWMEnable":
                             try {
                                 this._worker.addAction(new PWMEnable(this.parsePWM(pin), this.parseBoolean(tokens[2])));
@@ -64,6 +69,8 @@ export class Process
                                 console.log(error);
                             }
                             break;
+                        case "pwmsetperiod":
+                        case "pwmSetPeriod":
                         case "PWMSetPeriod":
                             try {
                                 this._worker.addAction(new PWMSetPeriod(this.parsePWM(pin), parseFloat(tokens[2])));
@@ -71,6 +78,8 @@ export class Process
                                 console.log(error);
                             }
                             break;
+                        case "pwmsetduty":
+                        case "pwmSetDuty":
                         case "PWMSetDuty":
                             try {
                                 this._worker.addAction(new PWMSetDuty(this.parsePWM(pin), parseFloat(tokens[2])));
@@ -78,6 +87,8 @@ export class Process
                                 console.log(error);
                             }
                             break;
+                        case "pwmlinearaccel":
+                        case "pwmLinearAccel":
                         case "PWMLinearAccel":
                             try {
                                 this._worker.addAction(new PWMLinearAccel(this.parsePWM(pin), parseFloat(tokens[2]), parseFloat(tokens[3]), parseFloat(tokens[4])));
@@ -94,7 +105,8 @@ export class Process
     
     public async run() {
         await this._worker.run();
-        this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
+        if(this._worker.workingState != WorkingState.Pause)
+            this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
     }
 
     private parseBoolean(input:string):boolean {
@@ -134,6 +146,13 @@ export class Process
             {
                 case WorkingState.Stop:
                     this._worker.stop();
+                    break;
+                case WorkingState.Pause:
+                    this._worker.pause();
+                    break;
+                case WorkingState.Resume:
+                    this._worker.resume();
+                    break;
             }
         });
     }
