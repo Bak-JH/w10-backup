@@ -79,10 +79,6 @@ if(parentPort){
 //     if(isAccelStopped) accelLoop(duty,dsfljk, lastTime);
 //     else loop();
 // }
-    breakLoop = false;
-    if(accelData) accelLoop(duty, accelData.targetDuty, accelData.lastTime);
-    else loop();
-}
 
 function stop() {
     console.log("stop called");
