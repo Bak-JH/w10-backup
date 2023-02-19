@@ -109,7 +109,8 @@ async function loop() {
 
 async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) {
     console.log("pin " + pin + " start accel loop");
- 
+    parentPort?.postMessage('starts accel');
+
     const timeStep = 1000;
     const stepCnt = Math.ceil(totalTime / timeStep);
     const spdInc = (targetDuty - startDuty)/ stepCnt;
