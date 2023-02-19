@@ -236,7 +236,13 @@ class PWMLinearAccel extends PWMAction {
     private readonly _stopWatch = new Stopwatch();
 
     private readonly wait = (timeToDelay:number) => new AbortablePromise((resolve) => setTimeout(resolve, timeToDelay));
-
+    private readonly workerPromise = new Promise ((resolve) => {
+        PWMWorker.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
+        PWMWorker.get(this.pin)?.on('message', () => {
+            this._stopWatch.start();
+            resolve("done");
+        });
+    });
 
     get startSpeed() : number { return this._startSpeed; }
     get targetSpeed() : number { return this._targetSpeed; }
@@ -255,27 +261,18 @@ class PWMLinearAccel extends PWMAction {
         await super.run();
         console.log("PWMAction: PWMLinearAccel");
         this._stopWatch.reset();
-
-        const workerPromise = new Promise ((resolve) => {
-            PWMWorker.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
-            PWMWorker.get(this.pin)?.on('message', () => {
-                this._stopWatch.start();
-                resolve("done");
-            });
-        });
-
-        await workerPromise;
+        await this.workerPromise;
         this._promise = this.wait(this.duration);
         
 
         return this._promise;
     }
     
-    public stop() {
+    public async stop() {
         console.log("Stopped: PWMLinearAccel");
         this._stopWatch.stop();
         
-        return super.stop();
+        await super.stop();
     }
 
     public resume() {
