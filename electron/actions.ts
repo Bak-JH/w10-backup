@@ -70,6 +70,12 @@ abstract class GPIOAction extends Action {
 abstract class PWMAction extends Action {
     //variable
     private readonly _pin!:PWMPin;
+    private readonly _stopPromise = new Promise ((resolve) => {
+            PWMWorker.get(this._pin)?.on('message', (message) => {
+            console.log(message);
+            resolve(message);
+        });
+    });
 
     //getter
     get pin () : PWMPin { return this._pin; }
@@ -78,10 +84,6 @@ abstract class PWMAction extends Action {
     constructor(pin:PWMPin) {
         super(); 
         this._pin = pin; 
-
-        PWMWorker.get(this.pin)?.on('message', (message) => {
-            console.log(message);
-        });
     }
 
     public async run() {
@@ -96,8 +98,9 @@ abstract class PWMAction extends Action {
         return initPromise;
     }
 
-    public stop() {
+    public async stop() {
         PWMWorker.get(this.pin)?.postMessage(["stop"]);
+        await this._stopPromise;
         super.stop();
     }
 
@@ -272,7 +275,7 @@ class PWMLinearAccel extends PWMAction {
         console.log("Stopped: PWMLinearAccel");
         this._stopWatch.stop();
         
-        super.stop();
+        return super.stop();
     }
 
     public resume() {
