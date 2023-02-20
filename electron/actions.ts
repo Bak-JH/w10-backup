@@ -33,8 +33,7 @@ function enableDisabledPins() {
     ActivePins.forEach((obj, pin) => {
         if(pin == PWMPin.pump || pin == PWMPin.propeller)
             PWMWorker.get(pin)?.postMessage(["resume"]);
-        obj?.writeSync(1);
-    });
+     });
 }
   
 function toBinaryValue(boolValue:boolean):BinaryValue {
@@ -277,6 +276,11 @@ class PWMLinearAccel extends PWMAction {
         
         super.stop();
     }
+
+    public pause() {
+        this._stopWatch.stop();
+        super.stop();
+    }
 }
 
 class Wait extends Action {
@@ -298,7 +302,7 @@ class Wait extends Action {
     public run() {
         console.log("Action: Wait - " + this.duration);
         this._stopWatch.reset();
-        this._promise = this.wait(this.duration - this._stopWatch.getTime());
+        this._promise = this.wait(this.duration);
         this._stopWatch.start();
         return this._promise;
     }
@@ -306,6 +310,18 @@ class Wait extends Action {
     public stop() {
         this._stopWatch.stop();
         super.stop();
+    }
+
+    public pause() {
+        this._stopWatch.stop();
+        super.stop();
+    }
+
+    public resume() {
+        console.log("RE: wait " + (this._duration - this._stopWatch.getTime()));
+        this._promise = this.wait(this.duration - this._stopWatch.getTime());
+        this._stopWatch.start();
+        return this._promise;
     }
 }
 

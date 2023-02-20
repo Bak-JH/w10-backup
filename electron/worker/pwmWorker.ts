@@ -127,7 +127,7 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
     console.log("accel done");
     
     if(!breakLoop) loop();
-    else parentPort?.postMessage([targetDuty]);
+    else parentPort?.postMessage([duty]);
 }
 
 export {WorkerMethod}

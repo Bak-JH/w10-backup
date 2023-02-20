@@ -42,7 +42,7 @@ export class WashWorker {
     public async run() {
         this.reset();
 
-        for(this._actionIdx = 0; this._actionIdx < this._actions.length; this._actionIdx++) {
+        for(this._actionIdx; this._actionIdx < this._actions.length; this._actionIdx++) {
             try {
                 await this._actions[this._actionIdx].run();
             } catch (e) {
@@ -57,6 +57,7 @@ export class WashWorker {
         this._workingState = WorkingState.Stop;
         this._stopwatch.stop();
         this._actions[this._actionIdx].stop();
+        this._actionIdx = 0;
 
         if(this._onWorkingStateChangedCallback) 
             this._onWorkingStateChangedCallback(this._workingState);
@@ -78,12 +79,13 @@ export class WashWorker {
         if(this._onWorkingStateChangedCallback) 
             this._onWorkingStateChangedCallback(this._workingState);
 
-        for(this._actionIdx; this._actionIdx < this._actions.length; ++this._actionIdx) {
-            try {
-                await this._actions[this._actionIdx].resume();
-            } catch (e) {
-                break;
-            }
+        try {
+            await this._actions[this._actionIdx].resume().then(()=>{
+                ++this._actionIdx;
+                this.run();
+            });
+        } catch (e) {
+            
         }
     }
 
