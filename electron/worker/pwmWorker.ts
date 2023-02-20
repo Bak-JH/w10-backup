@@ -52,12 +52,18 @@ if(parentPort){
 	        case WorkerMethod.Stop:
                 breakLoop = true;
                 break;
+            case WorkerMethod.Resume:
+                breakLoop = false;
+                if(stopInAccelLoop) accelLoop(duty, value[1], value[2]);
+                else loop();
+                break;
         }
 
         console.log("pin: " + pin + " period: " + period + " duty: " + duty);
 
         if( value[0] != WorkerMethod.LinearAccel && 
             value[0] != WorkerMethod.Stop &&
+            value[0] != WorkerMethod.Resume &&
             period > 0 && duty > 0 && duty < 1)// && gpioObj)
         {
             loop();

@@ -18,15 +18,24 @@ enum PWMPin {
     propeller     = 13
 }
 
-const ActivePins:Array<GPIOPin | PWMPin> = [];
+const ActivePins = new Map<GPIOPin | PWMPin, Gpio | null>();
 const PWMWorker = new Map<PWMPin, Worker>();
 
 function disableAllPins() {
-    for(const pin of ActivePins)
-    {
-        const gpio = new Gpio(pin, "out");
-        gpio.writeSync(0);
-    }
+    ActivePins.forEach((obj, pin) => {
+        if(pin == PWMPin.pump || pin == PWMPin.propeller)
+            PWMWorker.get(pin)?.postMessage(["stop"]);
+        obj?.writeSync(0);
+    });
+}
+
+function enableDisabledPins() {
+    ActivePins.forEach((obj, pin) => {
+        if(pin == PWMPin.pump || pin == PWMPin.propeller)
+            PWMWorker.get(pin)?.postMessage(["resume"]);
+        obj?.writeSync(1);
+    });
+    ActivePins.clear();
 }
   
 function toBinaryValue(boolValue:boolean):BinaryValue {
@@ -46,6 +55,7 @@ abstract class Action {
     }
 
     public resume():Promise<unknown> {
+        enableDisabledPins();
         return this.run();
     }
 }
@@ -90,11 +100,6 @@ abstract class PWMAction extends Action {
 
         return this._promise;
     }
-
-    public stop() {
-        PWMWorker.get(this.pin)?.postMessage(["stop"]);
-        super.stop();
-    }
 }
 
 class GPIOEnable extends GPIOAction {
@@ -111,8 +116,11 @@ class GPIOEnable extends GPIOAction {
     }
     public run() {
         this._promise = new AbortablePromise((resolve) => {
-            this.pinObj.writeSync(toBinaryValue(this._enable));
-            ActivePins.push(this.pin);
+            this.pinObj.writeSync(toBinaryValue(this.enable));
+            if(this.enable)
+                ActivePins.set(this.pin, this._pinObj);
+            else
+                ActivePins.delete(this.pin);
             console.log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
             resolve("done");
         });
@@ -139,9 +147,14 @@ class PWMEnable extends PWMAction {
 
         this._promise = new AbortablePromise((resolve) => {
             console.log("PWMAction: PWMEnable " + this.enable);
-
-            if(this.enable) PWMWorker.get(this.pin)?.postMessage(["setPin", this.pin]);
-            else  PWMWorker.get(this.pin)?.postMessage(["stop"]);
+            
+            if(this.enable) {
+                ActivePins.set(this.pin, null);
+                PWMWorker.get(this.pin)?.postMessage(["setPin", this.pin]);
+            } else {
+                ActivePins.delete(this.pin);
+                PWMWorker.get(this.pin)?.postMessage(["stop"]);
+            }
 
             resolve("done");
         });
