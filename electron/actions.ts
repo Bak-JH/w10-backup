@@ -35,7 +35,6 @@ function enableDisabledPins() {
             PWMWorker.get(pin)?.postMessage(["resume"]);
         obj?.writeSync(1);
     });
-    ActivePins.clear();
 }
   
 function toBinaryValue(boolValue:boolean):BinaryValue {

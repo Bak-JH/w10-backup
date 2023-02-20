@@ -80,7 +80,6 @@ export class WashWorker {
 
         for(this._actionIdx; this._actionIdx < this._actions.length; ++this._actionIdx) {
             try {
-                console.log(this._actions[this._actionIdx]);
                 await this._actions[this._actionIdx].resume();
             } catch (e) {
                 break;
