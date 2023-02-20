@@ -65,7 +65,7 @@ export class WashWorker {
     public pause() {
         this._workingState = WorkingState.Pause;
         this._stopwatch.stop();
-        this._actions[this._actionIdx].pause();
+        this._actions[this._actionIdx].stop();
 
         if(this._onWorkingStateChangedCallback) 
             this._onWorkingStateChangedCallback(this._workingState);
@@ -78,8 +78,9 @@ export class WashWorker {
         if(this._onWorkingStateChangedCallback) 
             this._onWorkingStateChangedCallback(this._workingState);
 
-        for(this._actionIdx = 0; this._actionIdx < this._actions.length; ++this._actionIdx) {
+        for(this._actionIdx; this._actionIdx < this._actions.length; ++this._actionIdx) {
             try {
+                console.log(this._actions[this._actionIdx]);
                 await this._actions[this._actionIdx].resume();
             } catch (e) {
                 break;

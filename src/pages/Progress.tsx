@@ -34,6 +34,7 @@ function Progress(){
     const isError = useRef("false")
     const stopwatchRef = useRef(new Stopwatch)
     const [elaspedTime, setelaspedTime] = useState(0)
+    const [isPaused, setIsPaused] = useState<boolean>(false);
 
     useEffect(()=>{
         const progressListener = window.electronAPI.onProgressMR((event:IpcRendererEvent, progress:number) => {
@@ -117,8 +118,13 @@ function Progress(){
                 </CircularProgressArea>
             </MainArea>
             <Footer>
-                <Button color='gray' type='small' onClick={() => {
-                    window.electronAPI.washCommandRM("pause")}}> Pause </Button>
+                { isPaused ?
+                    <Button color='blue' type='small' onClick={() => {
+                        window.electronAPI.washCommandRM("resume"); setIsPaused(false);}}> Resume </Button>
+                    :
+                    <Button color='gray' type='small' onClick={() => {
+                        window.electronAPI.washCommandRM("pause"); setIsPaused(true);}}> Pause </Button>
+                }
                 <Button color='blue' type='small' 
                 onClick={() => {setQuitModalVisible(true)}}> Quit </Button> 
             </Footer>

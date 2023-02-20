@@ -7,7 +7,6 @@ enum WorkerMethod{
     SetPeriod = "setPeriod",
     SetDuty = "setDuty",
     LinearAccel = "linearAccel",
-    Pause = "pause",
     Resume = "resume",
     Stop = "stop"
 }
@@ -47,53 +46,30 @@ if(parentPort){
                 breakLoop = true;
                 break;
             case WorkerMethod.LinearAccel:
-                parentPort?.postMessage('starts accel');
                 breakLoop = true;
                 accelLoop(value[1], value[2], value[3]);
                 break;
 	        case WorkerMethod.Stop:
-		        stop();
-                break;
-            case WorkerMethod.Pause:
                 breakLoop = true;
-                break;
-            case WorkerMethod.Resume:
-                breakLoop = false;
-                if(stopInAccelLoop) accelLoop(duty, value[1], value[2]);
-                else loop();
                 break;
         }
 
         console.log("pin: " + pin + " period: " + period + " duty: " + duty);
 
-        if(value[0] != WorkerMethod.LinearAccel && value[0] != WorkerMethod.Stop &&
-            period > 0 && duty > 0 && duty < 1 && gpioObj)
+        if( value[0] != WorkerMethod.LinearAccel && 
+            value[0] != WorkerMethod.Stop &&
+            period > 0 && duty > 0 && duty < 1)// && gpioObj)
         {
-            parentPort?.postMessage('starts loop');
-            breakLoop = false;
             loop();
         }
     })
 }
 
-// function resume(isAccelStopped: boolean, lastDuty?:number, lastTargetDuty?: number, lastTime?: number) {
-//     breakLoop = false;
-//     if(isAccelStopped) accelLoop(duty,dsfljk, lastTime);
-//     else loop();
-// }
-
-function stop() {
-    console.log("stop called");
-    breakLoop = true;
-    gpioObj.writeSync(OFF);
-    // duty = 0;
-    // period = 0;
-
-    parentPort?.postMessage(['last accel data', stopInAccelLoop, period, duty]);
-}
-
 async function loop() {
     console.log("pin " + pin + " start loop");
+    parentPort?.postMessage('starts loop');
+
+    breakLoop = false;
     stopInAccelLoop = false;
 
     while(!breakLoop)
@@ -105,15 +81,18 @@ async function loop() {
         // console.log("0")
         gpioObj.writeSync(OFF);
     }
+
+    console.log("loop done");
+    parentPort?.postMessage([period, duty]);
 }
 
 async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) {
-    console.log("pin " + pin + " start accel loop");
+    console.log("pin " + pin + " start accel loop for " + totalTime);
     parentPort?.postMessage('starts accel');
 
-    const timeStep = 1000;
+    const timeStep = 1000; // 1s
     const stepCnt = Math.ceil(totalTime / timeStep);
-    const spdInc = (targetDuty - startDuty)/ stepCnt;
+    const spdInc = (targetDuty - startDuty) / stepCnt;
     
     duty = startDuty;
     breakLoop = false;
@@ -133,13 +112,16 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
             gpioObj.writeSync(OFF);
         }
 
-        if (duty < targetDuty){
+        if (Math.abs(duty - targetDuty) > 0){
             duty += spdInc;
             console.log("accel: " + duty);
         }
     }
 
+    console.log("accel done");
+    
     if(!breakLoop) loop();
+    else parentPort?.postMessage([period, duty]);
 }
 
 export {WorkerMethod}
