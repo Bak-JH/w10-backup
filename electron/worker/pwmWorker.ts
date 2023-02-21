@@ -94,7 +94,6 @@ async function loop() {
 
 async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) {
     console.log("pin " + pin + " start accel loop for " + totalTime);
-    parentPort?.postMessage('starts accel');
 
     const timeStep = 1000; // 1s
     const stepCnt = Math.ceil(totalTime / timeStep);
@@ -126,8 +125,9 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
 
     console.log("accel done");
     
-    if(!breakLoop) loop();
+    if(!breakLoop) { parentPort?.postMessage("accel done"); loop(); }
     else parentPort?.postMessage([duty]);
+    
 }
 
 export {WorkerMethod}

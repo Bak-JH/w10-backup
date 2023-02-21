@@ -253,14 +253,14 @@ class PWMLinearAccel extends PWMAction {
         this._stopWatch.reset();
         PWMWorker.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
         
-        await new Promise ((resolve) => {
-            PWMWorker.get(this.pin)?.once('message', () => {
+        this._promise = new AbortablePromise ((resolve) => {
+            PWMWorker.get(this.pin)?.once('message', (message) => {
                 this._stopWatch.start();
-                resolve("done");
+                if (message == "accel done")
+                    resolve("done");
             });
         });
         
-        this._promise = this.wait(this.duration);
         return this._promise;
     }
     
@@ -321,6 +321,7 @@ class Wait extends Action {
 
     public resume() {
         console.log("RE: wait " + (this._duration - this._stopWatch.getTime()));
+        super.resume();
         this._promise = this.wait(this.duration - this._stopWatch.getTime());
         this._stopWatch.start();
         return this._promise;
