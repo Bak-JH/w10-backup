@@ -30,7 +30,7 @@ function eventRemove(listener:EventListener){
 }
 
 interface electronApiInterface {
-    washStartRM: () => void;
+    washStartRM: (quick?:boolean) => void;
     washCommandRM: (cmd :string) => void;
 
     shutdownRM: () => void;
@@ -46,7 +46,7 @@ interface electronApiInterface {
 }
 
 const exposedApi: electronApiInterface = {
-    washStartRM: () => ipcRenderer.send(WorkerCH.startRM),
+    washStartRM: (quick?:boolean) => ipcRenderer.send(WorkerCH.startRM, quick),
     washCommandRM: (cmd :string) => ipcRenderer.send(WorkerCH.commandRM,cmd),
     shutdownRM: () => ipcRenderer.send(WorkerCH.shutdownRM),
     factoryRestRM:() => ipcRenderer.send(WorkerCH.factoryResetRM),

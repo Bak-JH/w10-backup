@@ -8,34 +8,31 @@ import { WorkerCH } from './ipc/cmdChannels';
 
 export class Process
 {
-    private _filePath: string | undefined;
     private _worker: WashWorker = new WashWorker();
     private _totalTime: number = 0;
     private _renderEvent: any;
+    private _filePath!:string;
 
-    constructor(mainWindow:BrowserWindow, filePath: string) {
-        try {
-            this._renderEvent = mainWindow.webContents;
-            console.log(filePath);
-            if(fs.existsSync(filePath))
-                this._filePath = filePath;
-            else throw "FileNotFound";
+    get filePath() { return this._filePath; }
 
-            this.connectEvents(mainWindow);
-            this.readCommandFile();
-        } catch(err) {
-            console.log(err);
-            exit();
-        }
+    constructor(mainWindow:BrowserWindow) {
+        this._renderEvent = mainWindow.webContents;
+        this.connectEvents(mainWindow);
     }
 
     /**
     * name
     */
-    private readCommandFile() {    
-        if(this._filePath) {
+    private async readCommandFile(filePath:string) {
+        return new Promise((resolve, reject) => {
+            if(!fs.existsSync(filePath)) {
+                reject("FileNotFound - " + filePath);
+            }
+
+            this._worker.clearActions();
+
             //read file
-            fs.readFile(this._filePath, (err, data) => {                
+            fs.readFile(filePath, (err, data) => {                
                 //read line
                 for(const line of data.toString().split('\n')) {
                     //read commands
@@ -99,16 +96,27 @@ export class Process
                         default: console.log(command);;
                     }
                 }
+
+                resolve("File read done");
             });
-        }
+        });
     }
     
-    public async run() {
-        await this._worker.run().then(() => {
-            this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
-        }).catch((e) => {
-            console.log("run error")}
-        );        
+    public run(quick?:boolean) {
+        if(quick != null)
+            this._filePath = __dirname + quick ? "/quick.hc" : "/wash.hc";
+        
+        this.readCommandFile(this.filePath).then(()=>{
+            this._worker.run().then(() => {
+                this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
+            }).catch((e) => {
+                console.log("run error")}
+            );   
+        }).catch((err)=>{
+            console.error(err);
+            exit(1);
+        });
+
     }
 
     private parseBoolean(input:string):boolean {

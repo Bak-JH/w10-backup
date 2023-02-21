@@ -17,7 +17,7 @@ function Home(){
     <HomeArea>
         <HomeContainer>
             <ImageButton type="washBtn" src={waterImg} onClick={() => {navigate('/setting')}}>Wash</ImageButton>
-            <ImageButton type="quickBtn" src={quickImg} color="gray" onClick={() => { window.electronAPI.washStartRM(); navigate('/progress'); }}>Quick<br />Wash</ImageButton>
+            <ImageButton type="quickBtn" src={quickImg} color="gray" onClick={() => { window.electronAPI.washStartRM(true); navigate('/progress'); }}>Quick<br />Wash</ImageButton>
         </HomeContainer>
     </HomeArea>);
 }

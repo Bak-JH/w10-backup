@@ -32,6 +32,10 @@ export class WashWorker {
         this._actions.push(action);
     }
 
+    clearActions() {
+        this._actions.length = 0;
+    }
+
     private reset() {
         this._stopwatch.reset()
         this._totalTime = 0;

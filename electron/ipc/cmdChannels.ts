@@ -6,7 +6,7 @@
 //*TW - Renderer to Main Two Way
 
 enum WorkerCH {  
-    startRM          = "worker:start",
+    startRM          = "worker:start, quick?:boolean",
     commandRM          = "worker:command, cmd:string",
     shutdownRM          = "worker:shutdown",
     factoryResetRM          = "worker:factoryReset",

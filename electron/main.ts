@@ -63,10 +63,10 @@ function createWindow() {
         });
     }
     
-    const mainProcess = new Process(mainWin, "/opt/capsuleFW/bin/motor_test.hc");
+    const mainProcess = new Process(mainWin);
 
-    ipcMain.on(WorkerCH.startRM, (event:IpcMainEvent) => {
-        mainProcess.run();
+    ipcMain.on(WorkerCH.startRM, (event:IpcMainEvent, quick?:boolean) => {
+        mainProcess.run(quick);
     })
 }
 
