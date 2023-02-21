@@ -46,46 +46,44 @@ export class WashWorker {
             try {
                 await this._actions[this._actionIdx].run();
             } catch (e) {
-                break;
+                console.log("stop");
+                throw e;
             }
         }
 
+        this._actionIdx = 0;
         console.log("done");
     }
 
     public stop() {
         this._workingState = WorkingState.Stop;
+        this._onWorkingStateChangedCallback && this._onWorkingStateChangedCallback(this._workingState);
         this._stopwatch.stop();
+
         this._actions[this._actionIdx].stop();
         this._actionIdx = 0;
-
-        if(this._onWorkingStateChangedCallback) 
-            this._onWorkingStateChangedCallback(this._workingState);
     }
 
     public pause() {
         this._workingState = WorkingState.Pause;
-        this._stopwatch.stop();
-        this._actions[this._actionIdx].stop();
+        this._onWorkingStateChangedCallback && this._onWorkingStateChangedCallback(this._workingState);
 
-        if(this._onWorkingStateChangedCallback) 
-            this._onWorkingStateChangedCallback(this._workingState);
+        this._stopwatch.stop();
+        this._actions[this._actionIdx].pause();
     }
 
     public async resume() {
-        this._workingState = WorkingState.Start;
+        this._workingState = WorkingState.Resume;
+        this._onWorkingStateChangedCallback && this._onWorkingStateChangedCallback(this._workingState);
         this._stopwatch.start();
 
-        if(this._onWorkingStateChangedCallback) 
-            this._onWorkingStateChangedCallback(this._workingState);
-
         try {
-            await this._actions[this._actionIdx].resume().then(()=>{
-                ++this._actionIdx;
-                this.run();
-            });
-        } catch (e) {
-            
+            await this._actions[this._actionIdx].resume();
+            ++this._actionIdx;
+        } catch(e) {
+            console.log("resume stopped");
+            console.log(this._actions[this._actionIdx]);
+            throw e;
         }
     }
 

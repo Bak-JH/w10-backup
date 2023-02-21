@@ -104,9 +104,11 @@ export class Process
     }
     
     public async run() {
-        await this._worker.run();
-        if(this._worker.workingState != WorkingState.Pause)
+        await this._worker.run().then(() => {
             this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
+        }).catch((e) => {
+            console.log("run error")}
+        );        
     }
 
     private parseBoolean(input:string):boolean {
@@ -140,7 +142,6 @@ export class Process
     }
 
     private connectEvents(mainWindow: BrowserWindow) {
-        this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
         ipcMain.on(WorkerCH.commandRM,(event:IpcMainEvent,cmd:string)=>{
             switch(cmd)
             {
@@ -151,9 +152,21 @@ export class Process
                     this._worker.pause();
                     break;
                 case WorkingState.Resume:
-                    this._worker.resume();
+                    this._worker.resume().then(()=>{
+                        this._worker.run().catch(()=>{});
+                    }).catch(() => {});
                     break;
             }
         });
+
+        this._worker.onProgressCB((progress:number)=>{
+            mainWindow.webContents.send(WorkerCH.onProgressMR,progress)
+        })
+        this._worker.onStateChangeCB((state:WorkingState,message?:string)=>{
+            mainWindow.webContents.send(WorkerCH.onWorkingStateChangedMR,state,message)
+        })
+        this._worker.onSetTotalTimeCB((value:number)=>{
+            mainWindow.webContents.send(WorkerCH.onSetTotalTimeMR,value)
+        })
     }
 }

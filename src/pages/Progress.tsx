@@ -24,12 +24,9 @@ function Progress(){
     const navigate = useNavigate()
 
     const [progressValue, setProgressValue] = useState<number>(45)
-    const [filename, setFilename] = useState<string>("")
     const [totalTime, setTotalTime] = useState(0)
 
     const [quitModalVisible,setQuitModalVisible] = useState<boolean>(false)
-    const [quitModalBtnEnable,setQuitModalBtnEnable] = useState<boolean>(true)
-    const [quitWork,setQuitWork] = useState<boolean>(false)
 
     const isError = useRef("false")
     const stopwatchRef = useRef(new Stopwatch)
@@ -95,9 +92,6 @@ function Progress(){
                     <TitleText>
                         Status
                     </TitleText>
-                    <ValueText>
-                        {filename}
-                    </ValueText>
 
 
                     <CircleProgress>
@@ -128,13 +122,10 @@ function Progress(){
                 <Button color='blue' type='small' 
                 onClick={() => {setQuitModalVisible(true)}}> Quit </Button> 
             </Footer>
-            <Modal visible={quitModalVisible} btnEnable={quitModalBtnEnable} selectString="Quit" backString="Resume"
+            <Modal visible={quitModalVisible} selectString="Quit" backString="Resume"
                 onBackClicked={() => setQuitModalVisible(false)}
-                onSelectClicked={() => { window.electronAPI.washCommandRM("stop"); navigate('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current); }}
-                backVisible={!quitWork} selectVisible={!quitWork}>
-                    <ModalNotice text={
-                        quitWork ? "wait for movement" : "Are you sure to quit?"
-                    }/>
+                onSelectClicked={() => { window.electronAPI.washCommandRM("stop"); navigate('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current); }}>
+                    <ModalNotice text="Are you sure to quit?"/>
             </Modal>
         </div>
     );

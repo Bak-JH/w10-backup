@@ -52,6 +52,10 @@ abstract class Action {
         this._promise.abort();
     }
 
+    public pause():void {
+        this.stop();
+    }
+
     public resume():Promise<unknown> {
         enableDisabledPins();
         return this.run();
@@ -257,8 +261,6 @@ class PWMLinearAccel extends PWMAction {
         });
         
         this._promise = this.wait(this.duration);
-        
-
         return this._promise;
     }
     
@@ -279,7 +281,7 @@ class PWMLinearAccel extends PWMAction {
 
     public pause() {
         this._stopWatch.stop();
-        super.stop();
+        super.pause();
     }
 }
 
@@ -314,7 +316,7 @@ class Wait extends Action {
 
     public pause() {
         this._stopWatch.stop();
-        super.stop();
+        super.pause();
     }
 
     public resume() {
