@@ -27,7 +27,7 @@ const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve
 
 if(parentPort){
     parentPort.on("message",(value)=>{
-        console.log("Worker: receive - " + value);
+        console.log("Worker" + pin + " receive - " + value);
 
         switch(value[0])
         {
@@ -74,6 +74,7 @@ if(parentPort){
 
 async function loop() {
     console.log("pin " + pin + " start loop");
+    console.log(" period: " + period + " duty: " + duty);
     parentPort?.postMessage('starts loop');
 
     breakLoop = false;
