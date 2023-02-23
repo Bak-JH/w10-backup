@@ -45,7 +45,7 @@ function enableDisabledPins() {
         if(pin == PWMPin.pump || pin == PWMPin.propeller)
             PWMWorkers.get(pin)?.postMessage(["resume"]);
 
-        obj?.writeSync(0);
+        obj?.writeSync(1);
     });
 }
   
