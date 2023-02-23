@@ -19,7 +19,10 @@ enum PWMPin {
 }
 
 const ActivePins = new Map<GPIOPin | PWMPin, typeof Gpio | null>();
-const PWMWorker = new Worker(__dirname + '/worker/pwmWorker.js');
+const PWMWorkers = new Map<PWMPin, Worker> ([
+    [PWMPin.pump, new Worker(__dirname + '/worker/pwmWorker.js')], 
+    [PWMPin.propeller, new Worker(__dirname + '/worker/pwmWorker.js')]
+]);
 
 
 function disableAllPins() {
@@ -27,8 +30,8 @@ function disableAllPins() {
         ActivePins.forEach((obj, pin) => {
             if(pin == PWMPin.pump || pin == PWMPin.propeller)
             {
-                PWMWorker?.postMessage(["stop"]);
-                PWMWorker.once('message', (message)=>{
+                PWMWorkers.get(pin)?.postMessage(["stop"]);
+                PWMWorkers.get(pin)?.once('message', (message)=>{
                     resolve(message);
                 })
             }
@@ -40,7 +43,7 @@ function disableAllPins() {
 function enableDisabledPins() {
     ActivePins.forEach((obj, pin) => {
         if(pin == PWMPin.pump || pin == PWMPin.propeller)
-            PWMWorker?.postMessage(["resume"]);
+            PWMWorkers.get(pin)?.postMessage(["resume"]);
 
         obj?.writeSync(0);
     });
@@ -148,10 +151,10 @@ class PWMEnable extends PWMAction {
             
             if(this.enable) {
                 ActivePins.set(this.pin, null);
-                PWMWorker.postMessage(["setPin", this.pin]);
+                PWMWorkers.get(this.pin)?.postMessage(["setPin", this.pin]);
             } else {
                 ActivePins.delete(this.pin);
-                PWMWorker.postMessage(["stop"]);
+                PWMWorkers.get(this.pin)?.postMessage(["stop"]);
             }
 
             resolve("done");
@@ -180,7 +183,7 @@ class PWMSetPeriod extends PWMAction {
         this._promise = new AbortablePromise((resolve) => {
             console.log("PWMAction: PWMSetPeriod");
 
-            PWMWorker.postMessage(["setPeriod", this.period]);
+            PWMWorkers.get(this.pin)?.postMessage(["setPeriod", this.period]);
             resolve("done");
         });
 
@@ -205,8 +208,8 @@ class PWMSetDuty extends PWMAction {
         this._promise = new AbortablePromise ((resolve) => {
             console.log("PWMAction: PWMDuty");
                 
-            PWMWorker.postMessage(["setDuty", this.duty]);
-            PWMWorker.once('message', (message) => {
+            PWMWorkers.get(this.pin)?.postMessage(["setDuty", this.duty]);
+            PWMWorkers.get(this.pin)?.once('message', (message) => {
                 resolve(message);
             });
         });
@@ -242,10 +245,10 @@ class PWMLinearAccel extends PWMAction {
         console.log("PWMAction: PWMLinearAccel");
 
         this._stopWatch.reset();
-        PWMWorker.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
+        PWMWorkers.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
         
         this._promise = new AbortablePromise ((resolve) => {
-            PWMWorker.once('message', (message) => {
+            PWMWorkers.get(this.pin)?.once('message', (message) => {
                 this._stopWatch.start();
                 if (message == "accel done")
                     resolve("done");
@@ -259,9 +262,9 @@ class PWMLinearAccel extends PWMAction {
         console.log("Stopped: PWMLinearAccel");
         this._stopWatch.stop();
 
-        PWMWorker.postMessage(["stop"]);
+        PWMWorkers.get(this.pin)?.postMessage(["stop"]);
         await new Promise ((resolve) => {
-            PWMWorker.once('message', (message) => {
+            PWMWorkers.get(this.pin)?.once('message', (message) => {
                 console.log(message);
                 resolve("done");
             });
