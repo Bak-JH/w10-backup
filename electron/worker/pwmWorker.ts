@@ -28,12 +28,12 @@ const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve
 if(parentPort){
     parentPort.on("message",(value)=>{
         console.log("Worker" + pin + " receive - " + value);
+        if (!gpioObj) gpioObj = new Gpio(pin, 'out');
 
         switch(value[0])
         {
             case WorkerMethod.SetPin:
                 pin = value[1];
-                if (!gpioObj) gpioObj = new Gpio(pin, 'out');
                 breakLoop = true;
                 duty = 0;
                 period = 0;
@@ -60,7 +60,6 @@ if(parentPort){
                 return;
         }
 
-        console.log("pin: " + pin + " period: " + period + " duty: " + duty);
 
         if( value[0] != WorkerMethod.LinearAccel && 
             value[0] != WorkerMethod.Stop &&
