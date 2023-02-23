@@ -57,7 +57,7 @@ if(parentPort){
                 breakLoop = false;
                 if(stopInAccelLoop) accelLoop(duty, value[1], value[2]);
                 else loop();
-                break;
+                return;
         }
 
         console.log("pin: " + pin + " period: " + period + " duty: " + duty);
