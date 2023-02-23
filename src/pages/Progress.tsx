@@ -37,9 +37,8 @@ function Progress(){
         const progressListener = window.electronAPI.onProgressMR((event:IpcRendererEvent, progress:number) => {
             setProgressValue(Number((progress*100).toFixed()))
         })
-        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,time:number)=>{
-            console.log(time)
-            setTotalTime(time)
+        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,totalTime:number)=>{
+            setTotalTime(totalTime)
         })
 
         const workingStateListener = window.electronAPI.onWorkingStateChangedMR((event:IpcRendererEvent,state:string,message?:string)=>{

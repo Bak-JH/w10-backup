@@ -13,7 +13,7 @@ enum WorkerCH {
 
     onWorkingStateChangedMR = "worker:onWorkingStateChanged,state:string,message:string",
     onProgressMR = "worker:onProgress,progress:number",
-    onSetTotalTimeMR = "worker:onSetTotalTimeMR",
+    onSetTotalTimeMR = "worker:onSetTotalTimeMR, totalTime:number",
 }
 
 enum ProductCH {

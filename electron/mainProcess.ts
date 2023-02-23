@@ -30,6 +30,7 @@ export class Process
             }
 
             this._worker.clearActions();
+            this._totalTime = 0;
 
             //read file
             fs.readFile(filePath, (err, data) => {                
@@ -46,54 +47,54 @@ export class Process
                     switch(command) {
                         case "Wait":
                         case "wait":
-                            this._worker.addAction(new Wait(parseInt(pin)));
+                            this._worker.addAction(new Wait(parseInt(tokens[1]))); // duration
+                            this._totalTime += parseInt(tokens[1]);
                             break;
+
                         case "gpioenable":
                         case "gpioEnable":
                         case "GPIOEnable":
-                            try {
-                                this._worker.addAction(new GPIOEnable(this.parseGPIO(pin), this.parseBoolean(tokens[2])));
-                            } catch (error) {
-                                console.log(error);
-                            }
+                            this._worker.addAction(
+                                new GPIOEnable(this.parseGPIO(pin),            // pin
+                                               this.parseBoolean(tokens[2]))); // enable or disable
                             break;
+
                         case "pwmenable":
                         case "pwmEnable":
                         case "PWMEnable":
-                            try {
-                                this._worker.addAction(new PWMEnable(this.parsePWM(pin), this.parseBoolean(tokens[2])));
-                            } catch (error) {
-                                console.log(error);
-                            }
+                            this._worker.addAction(
+                                new PWMEnable(this.parsePWM(pin),             // pin
+                                              this.parseBoolean(tokens[2]))); // enable or disable
                             break;
+
                         case "pwmsetperiod":
                         case "pwmSetPeriod":
                         case "PWMSetPeriod":
-                            try {
-                                this._worker.addAction(new PWMSetPeriod(this.parsePWM(pin), parseFloat(tokens[2])));
-                            } catch (error) {
-                                console.log(error);
-                            }
+                            this._worker.addAction(
+                                new PWMSetPeriod(this.parsePWM(pin),      // pin
+                                                 parseFloat(tokens[2]))); // period
                             break;
+
                         case "pwmsetduty":
                         case "pwmSetDuty":
                         case "PWMSetDuty":
-                            try {
-                                this._worker.addAction(new PWMSetDuty(this.parsePWM(pin), parseFloat(tokens[2])));
-                            } catch (error) {
-                                console.log(error);
-                            }
+                            this._worker.addAction(
+                                new PWMSetDuty(this.parsePWM(pin),      // pin
+                                               parseFloat(tokens[2]))); // duty
                             break;
+
                         case "pwmlinearaccel":
                         case "pwmLinearAccel":
                         case "PWMLinearAccel":
-                            try {
-                                this._worker.addAction(new PWMLinearAccel(this.parsePWM(pin), parseFloat(tokens[2]), parseFloat(tokens[3]), parseFloat(tokens[4])));
-                            } catch (error) {
-                                console.log(error);
-                            }
+                            this._worker.addAction(
+                                new PWMLinearAccel(this.parsePWM(pin),      // pin
+                                                   parseFloat(tokens[2]),   // start speed
+                                                   parseFloat(tokens[3]),   // target speed
+                                                   parseInt(tokens[4])));   // duration
+                            this._totalTime += parseInt(tokens[4]);
                             break;
-                        default: console.log(command);;
+
+                        default: console.log(command);
                     }
                 }
 
@@ -104,14 +105,15 @@ export class Process
     
     public run(quick?:boolean) {
         if(quick != null)
-            this._filePath = __dirname + quick ? "/quick.hc" : "/wash.hc";
-        
+            this._filePath = quick ? "./quick.hc" : "./wash.hc";
+
         this.readCommandFile(this.filePath).then(()=>{
+            this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
             this._worker.run().then(() => {
                 this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
             }).catch((e) => {
                 console.log("run error")}
-            );   
+            );
         }).catch((err)=>{
             console.error(err);
             exit(1);
@@ -172,9 +174,6 @@ export class Process
         })
         this._worker.onStateChangeCB((state:WorkingState,message?:string)=>{
             mainWindow.webContents.send(WorkerCH.onWorkingStateChangedMR,state,message)
-        })
-        this._worker.onSetTotalTimeCB((value:number)=>{
-            mainWindow.webContents.send(WorkerCH.onSetTotalTimeMR,value)
         })
     }
 }

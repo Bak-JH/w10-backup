@@ -34,6 +34,7 @@ if(parentPort){
             case WorkerMethod.SetPin:
                 pin = value[1];
                 if (!gpioObj) gpioObj = new Gpio(pin, 'out');
+                breakLoop = true;
                 duty = 0;
                 period = 0;
                 break;
@@ -64,7 +65,7 @@ if(parentPort){
         if( value[0] != WorkerMethod.LinearAccel && 
             value[0] != WorkerMethod.Stop &&
             value[0] != WorkerMethod.Resume &&
-            period > 0 && duty > 0 && duty < 1)// && gpioObj)
+            period > 0 && duty > 0 && duty < 1 && gpioObj)
         {
             loop();
         }
