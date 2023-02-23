@@ -1,4 +1,4 @@
-import { BinaryValue, Gpio} from 'onoff';
+const Gpio = require('onoff').Gpio
 import { Worker } from 'worker_threads';
 import { log } from './logging'
 import { Stopwatch } from 'ts-stopwatch';
@@ -18,15 +18,22 @@ enum PWMPin {
     propeller     = 13
 }
 
-const ActivePins = new Map<GPIOPin | PWMPin, Gpio | null>();
+const ActivePins = new Map<GPIOPin | PWMPin, typeof Gpio | null>();
 const PWMWorker = new Worker(__dirname + '/worker/pwmWorker.js');
 
 
 function disableAllPins() {
-    ActivePins.forEach((obj, pin) => {
-        if(pin == PWMPin.pump || pin == PWMPin.propeller)
-            PWMWorker?.postMessage(["stop"]);
-        obj?.writeSync(0);
+    return new Promise((resolve) => {
+        ActivePins.forEach((obj, pin) => {
+            if(pin == PWMPin.pump || pin == PWMPin.propeller)
+            {
+                PWMWorker?.postMessage(["stop"]);
+                PWMWorker.once('message', (message)=>{
+                    resolve(message);
+                })
+            }
+            obj?.writeSync(0);
+        });
     });
 }
 
@@ -34,11 +41,12 @@ function enableDisabledPins() {
     ActivePins.forEach((obj, pin) => {
         if(pin == PWMPin.pump || pin == PWMPin.propeller)
             PWMWorker?.postMessage(["resume"]);
-            obj?.writeSync(0);
+
+        obj?.writeSync(0);
     });
 }
   
-function toBinaryValue(boolValue:boolean):BinaryValue {
+function toBinaryValue(boolValue:boolean):0 | 1 {
     return boolValue ? 1 : 0;
 }
 
@@ -67,11 +75,11 @@ abstract class Action {
 abstract class GPIOAction extends Action {
     //variable
     private readonly _pin!:GPIOPin 
-    protected _pinObj!:Gpio;
+    protected _pinObj!:typeof Gpio;
 
     //getter
     get pin() : GPIOPin { return this._pin; }
-    get pinObj() : Gpio { return this._pinObj; }
+    get pinObj() : typeof Gpio { return this._pinObj; }
 
     //method
     constructor(pin:GPIOPin) { 
@@ -302,9 +310,9 @@ class Wait extends Action {
         super.pause();
     }
 
-    public resume() {
+    public async resume() {
         console.log("RE: wait " + (this._duration - this._stopWatch.getTime()));
-        super.resume();
+        await enableDisabledPins();
         this._promise = this.wait(this.duration - this._stopWatch.getTime());
         this._stopWatch.start();
         return this._promise;

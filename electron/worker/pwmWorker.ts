@@ -1,5 +1,5 @@
 import {parentPort} from 'worker_threads';
-import { Gpio } from 'onoff';
+const Gpio = require('onoff').Gpio
 import { exit } from 'process';
 
 enum WorkerMethod{
@@ -21,7 +21,7 @@ let period:number = 0;
 let duty:number = 0;
 
 let pin:number;
-let gpioObj:Gpio;
+let gpioObj:typeof Gpio;
 
 const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
 
