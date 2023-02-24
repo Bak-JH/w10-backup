@@ -68,8 +68,14 @@ function createWindow() {
     ipcMain.on(WorkerCH.startRM, (event:IpcMainEvent, quick?:boolean) => {
         mainProcess.run(quick);
     })
+
+    ipcMain.on(WorkerCH.setTimeRM, (event:IpcMainEvent, time:number)=>{
+        mainProcess.getWashTime(time*1000);
+    });
+
+
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(() => { 
     createWindow()
 })

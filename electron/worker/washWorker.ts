@@ -89,13 +89,8 @@ export class WashWorker {
 
     //callback
     private _onWorkingStateChangedCallback?: (state : WorkingState,message?:string) => void;
-    private _onSetTotalTime? : (time:number) => void;
 
     onStateChangeCB(callback : (state : WorkingState,message?:string) => void){
         this._onWorkingStateChangedCallback = callback;
-    }
-
-    onSetTotalTimeCB(callback : (time : number) => void){
-        this._onSetTotalTime = callback;
     }
 }

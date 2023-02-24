@@ -36,6 +36,8 @@ interface electronApiInterface {
     shutdownRM: () => void;
     factoryRestRM:()=>void;
 
+    setTimeRM:(time:number) => void;
+
     onWorkingStateChangedMR: (callback:(event:IpcRendererEvent,state: string,message?:string) => void) => EventListener;
     onShutDownEventMR: (callback:(event:IpcRendererEvent) => void) => EventListener;
     onSetTotalTimeMR: (callback:(event:IpcRendererEvent,totalTime:number)=>void) => EventListener;
@@ -49,6 +51,7 @@ const exposedApi: electronApiInterface = {
     washCommandRM: (cmd :string) => ipcRenderer.send(WorkerCH.commandRM,cmd),
     shutdownRM: () => ipcRenderer.send(WorkerCH.shutdownRM),
     factoryRestRM:() => ipcRenderer.send(WorkerCH.factoryResetRM),
+    setTimeRM:(time:number) => ipcRenderer.send(WorkerCH.setTimeRM, time),
 
     onWorkingStateChangedMR: (callback:(event: IpcRendererEvent,state: string,message?:string) => void) => {return eventADD(WorkerCH.onWorkingStateChangedMR,callback)},
     onShutDownEventMR: (callback:(event:IpcRendererEvent) => void) => {return eventADD(ProductCH.onShutDownEventMR,callback)},

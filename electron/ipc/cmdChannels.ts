@@ -10,8 +10,10 @@ enum WorkerCH {
     commandRM          = "worker:command, cmd:string",
     shutdownRM          = "worker:shutdown",
     factoryResetRM          = "worker:factoryReset",
+    setTimeRM        = "worker:setTime, time:number",
 
     onWorkingStateChangedMR = "worker:onWorkingStateChanged,state:string,message:string",
+    onProgressMR = "worker:onProgress,progress:number",
     onSetTotalTimeMR = "worker:onSetTotalTimeMR, totalTime:number",
 }
 

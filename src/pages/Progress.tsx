@@ -61,34 +61,27 @@ function Progress(){
             clearInterval(id);
         }
     },[]);
-    
+
     let timeC = totalTime - elaspedTime;
     let time = timeC < 0 ? new Date(-timeC) : new Date(timeC);
     let progressValue = Math.ceil((elaspedTime/totalTime)*100);
 
     return (
         <div>
-            <Header>
-
-            </Header>
             <MainArea>
                 <CircularProgressArea>
-                    <TitleText>
-                        Remaining time
-                    </TitleText>
-                    <ValueText>
-                        {
-                            timeC < 0 ?
-                            totalTime == 0 ? "Calculating" : -time.getMinutes() +"min " + -time.getSeconds() + "sec"
-                            : totalTime == 0 ? "Calculating" : time.getMinutes() +"min " + time.getSeconds() + "sec"
-                        }
-                    </ValueText>
-
-                    <TitleText>
-                        Status
-                    </TitleText>
-
-
+                    <div style={{marginTop: "75px"}}>
+                        <TitleText>
+                            Remaining time
+                        </TitleText>
+                        <ValueText>
+                            {
+                                timeC < 0 ?
+                                totalTime == 0 ? "Calculating" : -time.getMinutes() +"min " + -time.getSeconds() + "sec"
+                                : totalTime == 0 ? "Calculating" : time.getMinutes() +"min " + time.getSeconds() + "sec"
+                            }
+                        </ValueText>
+                    </div>
                     <CircleProgress>
                         <CircularProgressbarWithChildren value={progressValue} maxValue={100} minValue={0} strokeWidth={7}
                             styles={buildStyles({
@@ -138,7 +131,7 @@ const CircularProgressArea = styled.div`
     /* width: 360px; */
     // height: px;
 
-    margin-top: 25px;
+    margin-top: 50px;
     column-gap: 30px;
 
 `

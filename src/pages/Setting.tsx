@@ -10,8 +10,8 @@ import { electron } from 'process';
 
 function Setting(){
     const navigate = useNavigate();
-    const [totalTime, setTotalTime] = useState<number>(100);
-    const [motorSpeed, setMotorSpeed] = useState<number>(1);
+    const [totalTime, setTotalTime] = useState<number>(600);
+    const [motorTime, setMotorTime] = useState<number>(0);
     
     return (
     <HomeArea>
@@ -20,27 +20,20 @@ function Setting(){
                         title='Wash Time'
                         display='time'
                         value={totalTime}
-                        minValue={80}
-                        maxValue={120}
-                        sumValue={10}
+                        minValue={300}
+                        maxValue={1800}
+                        sumValue={30}
                         onValueChange={(v : number) => {
                             setTotalTime(v)
                         }}
                         />
-            <SetValue
-                        title='Motor Speed'
-                        display='number'
-                        value={motorSpeed}
-                        minValue={0}
-                        maxValue={10}
-                        sumValue={1}
-                        onValueChange={(v : number) => {
-                            setMotorSpeed(v)
-                        }}
-                        />
         </PageContainer>
         <PageContainer>
-            <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {window.electronAPI.washStartRM(false); navigate('/progress'); }}>Start</ImageButton>
+            <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {
+                window.electronAPI.setTimeRM(totalTime);
+                window.electronAPI.washStartRM(false); 
+                navigate('/progress'); 
+            }}>Start</ImageButton>
             <Button type="cancelBtn" color="gray" onClick={() => {navigate('/home')}}>Cancel</Button>        
         </PageContainer>
     </HomeArea>);

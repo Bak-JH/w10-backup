@@ -5,13 +5,16 @@ import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
 import { BrowserWindow, ipcMain, IpcMainEvent } from 'electron';
 import { WorkerCH } from './ipc/cmdChannels';
-
 export class Process
 {
     private _worker: WashWorker = new WashWorker();
     private _totalTime: number = 0;
+    private _washTime:number = 0;
     private _renderEvent: any;
     private _filePath!:string;
+
+    private readonly _washFileDir = "/opt/capsuleFw/bin/wash.hc"
+    private readonly _quickFileDir = "/opt/capsuleFw/bin/wash.hc"
 
     get filePath() { return this._filePath; }
 
@@ -20,9 +23,10 @@ export class Process
         this.connectEvents(mainWindow);
     }
 
-    /**
-    * name
-    */
+    public getWashTime(time:number) {
+        this._washTime = (time - 250000) / 2; // 250,000 is pump time
+    }
+    
     private async readCommandFile(filePath:string) {
         return new Promise((resolve, reject) => {
             if(!fs.existsSync(filePath)) {
@@ -31,6 +35,7 @@ export class Process
 
             this._worker.clearActions();
             this._totalTime = 0;
+            let isPropreller = false;
 
             //read file
             fs.readFile(filePath, (err, data) => {                
@@ -47,8 +52,10 @@ export class Process
                     switch(command) {
                         case "Wait":
                         case "wait":
-                            this._worker.addAction(new Wait(parseInt(tokens[1]))); // duration
-                            this._totalTime += parseInt(tokens[1]);
+                            const duration = isPropreller ? parseInt(tokens[1]) + this._washTime : parseInt(tokens[1]);
+                            isPropreller = false;
+                            this._worker.addAction(new Wait(duration)); // duration
+                            this._totalTime += duration;
                             break;
 
                         case "gpioenable":
@@ -62,6 +69,7 @@ export class Process
                         case "pwmenable":
                         case "pwmEnable":
                         case "PWMEnable":
+                            if(this.parsePWM(pin) == PWMPin.propeller) isPropreller = true;
                             this._worker.addAction(
                                 new PWMEnable(this.parsePWM(pin),             // pin
                                               this.parseBoolean(tokens[2]))); // enable or disable
@@ -105,7 +113,8 @@ export class Process
     
     public run(quick?:boolean) {
         if(quick != null)
-            this._filePath = quick ? "./quick.hc" : "./wash.hc";
+            this._filePath = quick ? this._quickFileDir : this._washFileDir;
+            // this._filePath = quick ? "./quick.hc" : "./wash.hc";
 
         this.readCommandFile(this.filePath).then(()=>{
             this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
@@ -169,6 +178,10 @@ export class Process
                     }).catch(() => {});
                     break;
             }
+        });
+
+        ipcMain.on(WorkerCH.setTimeRM, (event:IpcMainEvent, time:number)=>{
+            this._totalTime = time;
         });
 
         this._worker.onStateChangeCB((state:WorkingState,message?:string)=>{
