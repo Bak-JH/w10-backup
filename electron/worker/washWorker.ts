@@ -23,7 +23,6 @@ export class WashWorker {
     private _workingState: WorkingState = WorkingState.Start;
 
     private _actionIdx: number = 0;
-    private _progress : number = 0;
 
     get workingState() { return this._workingState; }
 
@@ -37,7 +36,6 @@ export class WashWorker {
 
     private reset() {
         this._stopwatch.reset()
-        this._progress = 0;
         this._workingState = WorkingState.Start;
     }
 
@@ -46,9 +44,6 @@ export class WashWorker {
 
         for(this._actionIdx; this._actionIdx < this._actions.length; this._actionIdx++) {
             try {
-                this._progress = (this._actionIdx + 1) / this._actions.length;
-                this._onProgressCallback && this._onProgressCallback(this._progress);
-
                 await this._actions[this._actionIdx].run();
             } catch (e) {
                 console.log("stop");
@@ -93,13 +88,8 @@ export class WashWorker {
     }
 
     //callback
-    private _onProgressCallback? : (progress:number) => void;
     private _onWorkingStateChangedCallback?: (state : WorkingState,message?:string) => void;
     private _onSetTotalTime? : (time:number) => void;
-    
-    onProgressCB(callback: (progress:number) => void) {
-        this._onProgressCallback = callback;
-    }
 
     onStateChangeCB(callback : (state : WorkingState,message?:string) => void){
         this._onWorkingStateChangedCallback = callback;

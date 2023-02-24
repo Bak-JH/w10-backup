@@ -23,7 +23,6 @@ function Progress(){
 
     const navigate = useNavigate()
 
-    const [progressValue, setProgressValue] = useState<number>(45)
     const [totalTime, setTotalTime] = useState(0)
 
     const [quitModalVisible,setQuitModalVisible] = useState<boolean>(false)
@@ -34,9 +33,6 @@ function Progress(){
     const [isPaused, setIsPaused] = useState<boolean>(false);
 
     useEffect(()=>{
-        const progressListener = window.electronAPI.onProgressMR((event:IpcRendererEvent, progress:number) => {
-            setProgressValue(Number((progress*100).toFixed()))
-        })
         const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,totalTime:number)=>{
             setTotalTime(totalTime)
         })
@@ -59,21 +55,21 @@ function Progress(){
         }, 100);
 
         return () => {
-            window.electronAPI.removeListener(progressListener);
-            window.electronAPI.removeListener(setTotalTimeListener);
+             window.electronAPI.removeListener(setTotalTimeListener);
             window.electronAPI.removeListener(workingStateListener);
-            
+
             clearInterval(id);
         }
     },[]);
     
     let timeC = totalTime - elaspedTime;
     let time = timeC < 0 ? new Date(-timeC) : new Date(timeC);
+    let progressValue = Math.ceil((elaspedTime/totalTime)*100);
 
     return (
         <div>
             <Header>
-                
+
             </Header>
             <MainArea>
                 <CircularProgressArea>
@@ -118,8 +114,8 @@ function Progress(){
                     <Button color='gray' type='small' onClick={() => {
                         window.electronAPI.washCommandRM("pause"); setIsPaused(true);}}> Pause </Button>
                 }
-                <Button color='blue' type='small' 
-                onClick={() => {setQuitModalVisible(true)}}> Quit </Button> 
+                <Button color='blue' type='small'
+                onClick={() => {setQuitModalVisible(true)}}> Quit </Button>
             </Footer>
             <Modal visible={quitModalVisible} selectString="Quit" backString="Resume"
                 onBackClicked={() => setQuitModalVisible(false)}
@@ -160,7 +156,7 @@ const TitleText = styled.div`
     font-size: 18px;
     justify-self: start;
     align-self: end;
-        
+
 `
 const ValueText = styled.div`
     color: #474747;

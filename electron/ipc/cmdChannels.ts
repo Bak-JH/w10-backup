@@ -12,7 +12,6 @@ enum WorkerCH {
     factoryResetRM          = "worker:factoryReset",
 
     onWorkingStateChangedMR = "worker:onWorkingStateChanged,state:string,message:string",
-    onProgressMR = "worker:onProgress,progress:number",
     onSetTotalTimeMR = "worker:onSetTotalTimeMR, totalTime:number",
 }
 

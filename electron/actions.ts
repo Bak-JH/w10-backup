@@ -35,7 +35,8 @@ function disableAllPins() {
                     resolve(message);
                 })
             }
-            obj?.writeSync(0);
+            if(pin != GPIOPin.valve)
+                obj?.writeSync(0);
         });
     });
 }
@@ -45,7 +46,8 @@ function enableDisabledPins() {
         if(pin == PWMPin.pump || pin == PWMPin.propeller)
             PWMWorkers.get(pin)?.postMessage(["resume"]);
 
-        obj?.writeSync(1);
+        if(pin != GPIOPin.valve)
+            obj?.writeSync(1);
     });
 }
   

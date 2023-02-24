@@ -163,15 +163,14 @@ export class Process
                     break;
                 case WorkingState.Resume:
                     this._worker.resume().then(()=>{
-                        this._worker.run().catch(()=>{});
+                        this._worker.run().then(()=>{
+                            this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop); 
+                        }).catch(()=>{});
                     }).catch(() => {});
                     break;
             }
         });
 
-        this._worker.onProgressCB((progress:number)=>{
-            mainWindow.webContents.send(WorkerCH.onProgressMR,progress)
-        })
         this._worker.onStateChangeCB((state:WorkingState,message?:string)=>{
             mainWindow.webContents.send(WorkerCH.onWorkingStateChangedMR,state,message)
         })
