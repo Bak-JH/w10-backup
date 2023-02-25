@@ -13,8 +13,11 @@ export class Process
     private _renderEvent: any;
     private _filePath!:string;
 
-    private readonly _washFileDir = "/opt/capsuleFw/bin/wash.hc"
-    private readonly _quickFileDir = "/opt/capsuleFw/bin/wash.hc"
+    private readonly _washFileDir = "/opt/capsuleFW/bin/wash.hc";
+    private readonly _quickFileDir = "/opt/capsuleFW/bin/quick.hc";
+
+    // private readonly _washFileDir = "./wash.hc";
+    // private readonly _quickFileDir = "./quick.hc";
 
     get filePath() { return this._filePath; }
 
@@ -52,7 +55,7 @@ export class Process
                     switch(command) {
                         case "Wait":
                         case "wait":
-                            const duration = isPropreller ? parseInt(tokens[1]) + this._washTime : parseInt(tokens[1]);
+                            const duration = isPropreller ? this._washTime : parseInt(tokens[1]);
                             isPropreller = false;
                             this._worker.addAction(new Wait(duration)); // duration
                             this._totalTime += duration;
@@ -69,7 +72,8 @@ export class Process
                         case "pwmenable":
                         case "pwmEnable":
                         case "PWMEnable":
-                            if(this.parsePWM(pin) == PWMPin.propeller) isPropreller = true;
+                            if(this.parsePWM(pin) == PWMPin.propeller && this.parseBoolean(tokens[2])) 
+                                isPropreller = true;
                             this._worker.addAction(
                                 new PWMEnable(this.parsePWM(pin),             // pin
                                               this.parseBoolean(tokens[2]))); // enable or disable
@@ -114,7 +118,6 @@ export class Process
     public run(quick?:boolean) {
         if(quick != null)
             this._filePath = quick ? this._quickFileDir : this._washFileDir;
-            // this._filePath = quick ? "./quick.hc" : "./wash.hc";
 
         this.readCommandFile(this.filePath).then(()=>{
             this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);

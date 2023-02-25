@@ -70,7 +70,7 @@ function Progress(){
         <div>
             <MainArea>
                 <CircularProgressArea>
-                    <div style={{marginTop: "75px"}}>
+                    <div>
                         <TitleText>
                             Remaining time
                         </TitleText>
