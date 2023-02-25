@@ -34,13 +34,9 @@ export class WashWorker {
         this._actions.length = 0;
     }
 
-    private reset() {
+    public async run() {
         this._stopwatch.reset()
         this._workingState = WorkingState.Start;
-    }
-
-    public async run() {
-        this.reset();
 
         for(this._actionIdx; this._actionIdx < this._actions.length; this._actionIdx++) {
             try {

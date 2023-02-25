@@ -11,7 +11,6 @@ import { electron } from 'process';
 function Setting(){
     const navigate = useNavigate();
     const [totalTime, setTotalTime] = useState<number>(600);
-    const [motorTime, setMotorTime] = useState<number>(0);
     
     return (
     <HomeArea>

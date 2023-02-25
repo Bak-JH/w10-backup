@@ -30,7 +30,7 @@ export class Process
         this._washTime = (time - 250000) / 2; // 250,000 is pump time
     }
     
-    private async readCommandFile(filePath:string) {
+    private async readCommandFile(filePath:string, quick?:boolean) {
         return new Promise((resolve, reject) => {
             if(!fs.existsSync(filePath)) {
                 reject("FileNotFound - " + filePath);
@@ -57,6 +57,7 @@ export class Process
                         case "wait":
                             const duration = isPropreller ? this._washTime : parseInt(tokens[1]);
                             isPropreller = false;
+
                             this._worker.addAction(new Wait(duration)); // duration
                             this._totalTime += duration;
                             break;
@@ -72,7 +73,7 @@ export class Process
                         case "pwmenable":
                         case "pwmEnable":
                         case "PWMEnable":
-                            if(this.parsePWM(pin) == PWMPin.propeller && this.parseBoolean(tokens[2])) 
+                            if(!quick && this.parsePWM(pin) == PWMPin.propeller && this.parseBoolean(tokens[2]))
                                 isPropreller = true;
                             this._worker.addAction(
                                 new PWMEnable(this.parsePWM(pin),             // pin
@@ -119,7 +120,7 @@ export class Process
         if(quick != null)
             this._filePath = quick ? this._quickFileDir : this._washFileDir;
 
-        this.readCommandFile(this.filePath).then(()=>{
+        this.readCommandFile(this.filePath, quick).then(()=>{
             this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
             this._worker.run().then(() => {
                 this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
@@ -130,7 +131,6 @@ export class Process
             console.error(err);
             exit(1);
         });
-
     }
 
     private parseBoolean(input:string):boolean {
@@ -189,6 +189,6 @@ export class Process
 
         this._worker.onStateChangeCB((state:WorkingState,message?:string)=>{
             mainWindow.webContents.send(WorkerCH.onWorkingStateChangedMR,state,message)
-        })
+        });
     }
 }
