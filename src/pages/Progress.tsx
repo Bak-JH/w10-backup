@@ -20,8 +20,7 @@ import { Stopwatch } from 'ts-stopwatch'
 import SlideText from '../components/SlideText';
 
 function Progress(){
-
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const [totalTime, setTotalTime] = useState(0)
 
@@ -33,6 +32,8 @@ function Progress(){
     const [isPaused, setIsPaused] = useState<boolean>(false);
 
     useEffect(()=>{
+        window.electronAPI.pageChangedRM();
+
         const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,totalTime:number)=>{
             setTotalTime(totalTime)
         })
@@ -55,7 +56,7 @@ function Progress(){
         }, 100);
 
         return () => {
-             window.electronAPI.removeListener(setTotalTimeListener);
+            window.electronAPI.removeListener(setTotalTimeListener);
             window.electronAPI.removeListener(workingStateListener);
 
             clearInterval(id);

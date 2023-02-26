@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
-import { WorkerCH, ProductCH } from './ipc/cmdChannels';
+import { WorkerCH, ProductCH } from './cmdChannels';
 let _id = 0
 
 interface EventListener{
@@ -32,11 +32,10 @@ function eventRemove(listener:EventListener){
 interface electronApiInterface {
     washStartRM: (quick?:boolean) => void;
     washCommandRM: (cmd :string) => void;
-
     shutdownRM: () => void;
     factoryRestRM:()=>void;
-
     setTimeRM:(time:number) => void;
+    pageChangedRM:() => void;
 
     onWorkingStateChangedMR: (callback:(event:IpcRendererEvent,state: string,message?:string) => void) => EventListener;
     onShutDownEventMR: (callback:(event:IpcRendererEvent) => void) => EventListener;
@@ -52,6 +51,7 @@ const exposedApi: electronApiInterface = {
     shutdownRM: () => ipcRenderer.send(WorkerCH.shutdownRM),
     factoryRestRM:() => ipcRenderer.send(WorkerCH.factoryResetRM),
     setTimeRM:(time:number) => ipcRenderer.send(WorkerCH.setTimeRM, time),
+    pageChangedRM:() => ipcRenderer.send(WorkerCH.pageChangedRM),
 
     onWorkingStateChangedMR: (callback:(event: IpcRendererEvent,state: string,message?:string) => void) => {return eventADD(WorkerCH.onWorkingStateChangedMR,callback)},
     onShutDownEventMR: (callback:(event:IpcRendererEvent) => void) => {return eventADD(ProductCH.onShutDownEventMR,callback)},

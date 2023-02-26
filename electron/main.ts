@@ -73,7 +73,9 @@ function createWindow() {
         mainProcess.getWashTime(time*1000);
     });
 
-
+    ipcMain.on(WorkerCH.pageChangedRM, (event:IpcMainEvent,)=>{
+        console.log("pageChangedRM");
+    });
 }
 
 app.whenReady().then(() => { 
