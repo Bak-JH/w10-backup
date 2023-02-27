@@ -2,9 +2,11 @@ import { parentPort } from 'worker_threads';
 import { Stopwatch } from 'ts-stopwatch';
 import { Action } from '../actions';
 
+import { log } from '../logging';
+
 if(parentPort){
     parentPort.on("message",(value)=>{
-        console.log("Worker: start",value)
+        log("Worker: start - " + value)
     })
 }
 
@@ -42,13 +44,13 @@ export class WashWorker {
             try {
                 await this._actions[this._actionIdx].run();
             } catch (e) {
-                console.log("stop");
+                log("stop");
                 throw e;
             }
         }
 
         this._actionIdx = 0;
-        console.log("done");
+        log("done");
     }
 
     public stop() {
@@ -77,8 +79,8 @@ export class WashWorker {
             await this._actions[this._actionIdx].resume();
             ++this._actionIdx;
         } catch(e) {
-            console.log("resume stopped");
-            console.log(this._actions[this._actionIdx]);
+            log("resume stopped");
+            log(this._actions[this._actionIdx]);
             throw e;
         }
     }

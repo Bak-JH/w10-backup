@@ -2,6 +2,8 @@ import {parentPort} from 'worker_threads';
 const Gpio = require('onoff').Gpio
 import { exit } from 'process';
 
+import { log } from '../logging';
+
 enum WorkerMethod{
     SetPin = "setPin",
     SetPeriod = "setPeriod",
@@ -27,7 +29,7 @@ const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve
 
 if(parentPort){
     parentPort.on("message",(value)=>{
-        console.log("Worker" + pin + " receive - " + value);
+        log("Worker" + pin + " receive - " + value);
 
         switch(value[0])
         {
@@ -72,8 +74,8 @@ if(parentPort){
 }
 
 async function loop() {
-    console.log("pin " + pin + " start loop");
-    console.log(" period: " + period + " duty: " + duty);
+    log("pin " + pin + " start loop");
+    log(" period: " + period + " duty: " + duty);
     parentPort?.postMessage('starts loop');
 
     breakLoop = false;
@@ -89,12 +91,12 @@ async function loop() {
         gpioObj.writeSync(OFF);
     }
 
-    console.log("loop done");
+    log("loop done");
     parentPort?.postMessage([period, duty]);
 }
 
 async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) {
-    console.log("pin " + pin + " start accel loop for " + totalTime);
+    log("pin " + pin + " start accel loop for " + totalTime);
 
     const timeStep = 1000; // 1s
     const stepCnt = Math.ceil(totalTime / timeStep);
@@ -120,11 +122,11 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
 
         if (Math.abs(duty - targetDuty) > 0){
             duty += spdInc;
-            console.log("accel: " + duty);
+            log("accel: " + duty);
         }
     }
 
-    console.log("accel done");
+    log("accel done");
     
     if(!breakLoop) { 
         parentPort?.postMessage("accel done"); 

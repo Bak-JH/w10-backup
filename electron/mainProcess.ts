@@ -5,6 +5,8 @@ import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
 import { BrowserWindow, ipcMain, IpcMainEvent } from 'electron';
 import { WorkerCH } from './ipc/cmdChannels';
+
+import { log } from './logging';
 export class Process
 {
     private _worker: WashWorker = new WashWorker();
@@ -62,7 +64,7 @@ export class Process
                     switch(command) {
                         case "Wait":
                         case "wait":
-                            if (isPropreller) console.log(lineNumber);
+                            if (isPropreller) log(lineNumber);
                             const duration = isPropreller ? this._washTime : parseInt(tokens[1]);
                             isPropreller = false;
 
@@ -115,7 +117,7 @@ export class Process
                             this._totalTime += parseInt(tokens[4]);
                             break;
 
-                        default: console.log(command);
+                        default: log(command);
                     }
                 }
 
@@ -133,7 +135,7 @@ export class Process
             this._worker.run().then(() => {
                 this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
             }).catch((e) => {
-                console.log("run error")}
+                log("run error")}
             );
         }).catch((err)=>{
             console.error(err);

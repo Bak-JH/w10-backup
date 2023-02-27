@@ -7,6 +7,8 @@ import isDev from 'electron-is-dev';
 import { Process } from './mainProcess';
 import { WorkerCH } from './ipc/cmdChannels';
 
+import { log } from './logging';
+
 function createWindow() {
 
     // create pi window
@@ -75,7 +77,6 @@ function createWindow() {
 
     ipcMain.on(WorkerCH.pageChangedRM, (event:IpcMainEvent,)=>{
         mainProcess.sendTotalTime();
-        console.log("pageChangedRM");
     });
 }
 

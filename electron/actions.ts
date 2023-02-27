@@ -126,7 +126,7 @@ class GPIOEnable extends GPIOAction {
                 ActivePins.set(this.pin, this._pinObj);
             else
                 ActivePins.delete(this.pin);
-            console.log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
+            log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
             resolve("done");
         });
 
@@ -149,7 +149,7 @@ class PWMEnable extends PWMAction {
 
     public async run() {
         this._promise = new AbortablePromise((resolve) => {
-            console.log("PWMAction: PWMEnable " + this.enable);
+            log("PWMAction: PWMEnable " + this.enable);
             
             if(this.enable) {
                 ActivePins.set(this.pin, null);
@@ -183,7 +183,7 @@ class PWMSetPeriod extends PWMAction {
 
     public run() {
         this._promise = new AbortablePromise((resolve) => {
-            console.log("PWMAction: PWMSetPeriod");
+            log("PWMAction: PWMSetPeriod");
 
             PWMWorkers.get(this.pin)?.postMessage(["setPeriod", this.period]);
             resolve("done");
@@ -208,7 +208,7 @@ class PWMSetDuty extends PWMAction {
     }
     public run() {        
         this._promise = new AbortablePromise ((resolve) => {
-            console.log("PWMAction: PWMDuty");
+            log("PWMAction: PWMDuty");
                 
             PWMWorkers.get(this.pin)?.postMessage(["setDuty", this.duty]);
             PWMWorkers.get(this.pin)?.once('message', (message) => {
@@ -244,7 +244,7 @@ class PWMLinearAccel extends PWMAction {
     }
 
     public run() {
-        console.log("PWMAction: PWMLinearAccel");
+        log("PWMAction: PWMLinearAccel");
 
         this._stopWatch.reset();
         PWMWorkers.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
@@ -261,13 +261,13 @@ class PWMLinearAccel extends PWMAction {
     }
     
     public async stop() {
-        console.log("Stopped: PWMLinearAccel");
+        log("Stopped: PWMLinearAccel");
         this._stopWatch.stop();
 
         PWMWorkers.get(this.pin)?.postMessage(["stop"]);
         await new Promise ((resolve) => {
             PWMWorkers.get(this.pin)?.once('message', (message) => {
-                console.log(message);
+                log(message);
                 resolve("done");
             });
         });
@@ -298,7 +298,7 @@ class Wait extends Action {
     }
 
     public run() {
-        console.log("Action: Wait - " + this.duration);
+        log("Action: Wait - " + this.duration);
         this._stopWatch.reset();
         this._promise = this.wait(this.duration);
         this._stopWatch.start();
@@ -316,7 +316,7 @@ class Wait extends Action {
     }
 
     public async resume() {
-        console.log("RE: wait " + (this._duration - this._stopWatch.getTime()));
+        log("RE: wait " + (this._duration - this._stopWatch.getTime()));
         await enableDisabledPins();
         this._promise = this.wait(this.duration - this._stopWatch.getTime());
         this._stopWatch.start();
