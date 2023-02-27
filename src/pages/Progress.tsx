@@ -69,9 +69,12 @@ function Progress(){
 
     return (
         <div>
+            <Header>
+
+            </Header>
             <MainArea>
                 <CircularProgressArea>
-                    <div>
+                    <div style={{gridRow:2, marginTop: '35px'}}>
                         <TitleText>
                             Remaining time
                         </TitleText>
@@ -121,13 +124,11 @@ function Progress(){
 }
 const CircularProgressArea = styled.div`
     display: grid;
-
     align-items: center;
     justify-content: center;
     align-content: center;
 
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr 1fr;
 
     /* width: 360px; */
     // height: px;

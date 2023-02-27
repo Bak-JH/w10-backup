@@ -43,11 +43,14 @@ export class Process
             this._worker.clearActions();
             this._totalTime = 0;
             let isPropreller = false;
+            let lineNumber = 0;
 
             //read file
             fs.readFile(filePath, (err, data) => {                
                 //read line
                 for(const line of data.toString().split('\n')) {
+                    lineNumber++
+
                     //read commands
                     const tokens = line.split(' ');
                     if(tokens.length < 2)
@@ -59,6 +62,7 @@ export class Process
                     switch(command) {
                         case "Wait":
                         case "wait":
+                            if (isPropreller) console.log(lineNumber);
                             const duration = isPropreller ? this._washTime : parseInt(tokens[1]);
                             isPropreller = false;
 
