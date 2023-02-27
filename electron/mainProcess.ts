@@ -34,7 +34,7 @@ export class Process
         this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
     }
 
-    private async readCommandFile(filePath:string, quick?:boolean) {
+    private async readCommandFile(filePath:string, quick:boolean) {
         return new Promise((resolve, reject) => {
             if(!fs.existsSync(filePath)) {
                 reject("FileNotFound - " + filePath);
@@ -124,7 +124,7 @@ export class Process
         if(quick != null)
             this._filePath = quick ? this._quickFileDir : this._washFileDir;
 
-        this.readCommandFile(this.filePath, quick).then(()=>{
+        this.readCommandFile(this.filePath, this.filePath == this._quickFileDir).then(()=>{
             this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
             this._worker.run().then(() => {
                 this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
