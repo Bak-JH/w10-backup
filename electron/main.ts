@@ -16,7 +16,7 @@ function createWindow() {
         backgroundColor: "#EEF5F9",
         titleBarStyle: process.platform === "win32" ? "default":"hidden",
         webPreferences: {
-          preload: path.join(__dirname, 'preload.js'),
+          preload: path.join(__dirname, '/ipc/preload.js'),
           sandbox: false,
         },
     });
