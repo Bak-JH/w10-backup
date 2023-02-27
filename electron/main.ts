@@ -74,6 +74,7 @@ function createWindow() {
     });
 
     ipcMain.on(WorkerCH.pageChangedRM, (event:IpcMainEvent,)=>{
+        mainProcess.sendTotalTime();
         console.log("pageChangedRM");
     });
 }

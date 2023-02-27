@@ -30,6 +30,10 @@ export class Process
         this._washTime = (time - 250000) / 2; // 250,000 is pump time
     }
     
+    public sendTotalTime() {
+        this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
+    }
+
     private async readCommandFile(filePath:string, quick?:boolean) {
         return new Promise((resolve, reject) => {
             if(!fs.existsSync(filePath)) {
