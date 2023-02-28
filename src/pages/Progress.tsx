@@ -19,8 +19,6 @@ import { ModalInfoMainArea, ModalInfoTitle, ModalInfoValue, ModalNotice } from '
 import { Stopwatch } from 'ts-stopwatch'
 import SlideText from '../components/SlideText';
 
-import { log } from '../../electron/logging'
-
 function Progress(){
     const navigate = useNavigate();
 
@@ -37,7 +35,7 @@ function Progress(){
         window.electronAPI.pageChangedRM();
 
         const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,totalTime:number)=>{
-            log("ui - " + totalTime)
+            console.log("ui - " + totalTime)
             setTotalTime(totalTime)
         })
 

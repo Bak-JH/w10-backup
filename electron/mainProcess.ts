@@ -34,7 +34,7 @@ export class Process
     
     public sendTotalTime() {
         this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
-        log(this._worker.actions)
+        console.log(this._totalTime)
     }
 
     private async readCommandFile(filePath:string, quick:boolean) {

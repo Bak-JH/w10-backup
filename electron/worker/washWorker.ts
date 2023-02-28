@@ -27,7 +27,6 @@ export class WashWorker {
     private _actionIdx: number = 0;
 
     get workingState() { return this._workingState; }
-    get actions():Array<Action> { return this.actions; }
 
     addAction(action:Action) {
         this._actions.push(action);
