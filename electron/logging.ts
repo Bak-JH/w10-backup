@@ -1,8 +1,8 @@
 // for logging
 var fs = require('fs');
 var util = require('util');
-var logfileName = '/log/electron.log';
-var logfile = fs.createWriteStream(__dirname + logfileName, {flags : 'a+'});
+var logfileName = '/opt/capsuleFW/bin/electron.log';
+var logfile = fs.createWriteStream(logfileName, {flags : 'a+'});
 var log_stdout = process.stdout;
  
 export function log(d:any):void {
