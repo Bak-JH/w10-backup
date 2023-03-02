@@ -11,7 +11,7 @@ import Modal from '../components/Modal';
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import MainArea from '../layout/MainArea';
 import Header from '../layout/Header';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ipcRenderer, IpcRendererEvent } from 'electron';
 
 import { ModalInfoMainArea, ModalInfoTitle, ModalInfoValue, ModalNotice } from '../layout/ModalInfo';
@@ -19,8 +19,13 @@ import { ModalInfoMainArea, ModalInfoTitle, ModalInfoValue, ModalNotice } from '
 import { Stopwatch } from 'ts-stopwatch'
 import SlideText from '../components/SlideText';
 
+interface RouteState {
+    state: {time: number;}
+}
+
 function Progress(){
     const navigate = useNavigate();
+    const location = useLocation() as RouteState;
 
     const [totalTime, setTotalTime] = useState(0)
 
@@ -34,9 +39,16 @@ function Progress(){
     useEffect(()=>{
         window.electronAPI.pageChangedRM();
 
-        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,totalTime:number)=>{
-            console.log("ui - " + totalTime)
-            setTotalTime(totalTime)
+        if(location.state) {
+            console.log("state: " + location.state.time)
+            setTotalTime(location.state.time * 1000);
+        }
+
+        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,time:number)=>{
+            if(!location.state) {
+                console.log("ui - " + time)
+                setTotalTime(time)
+            }
         })
 
         const workingStateListener = window.electronAPI.onWorkingStateChangedMR((event:IpcRendererEvent,state:string,message?:string)=>{
@@ -63,6 +75,7 @@ function Progress(){
             clearInterval(id);
         }
     },[]);
+
 
     let timeC = totalTime - elaspedTime;
     let time = timeC < 0 ? new Date(-timeC) : new Date(timeC);
