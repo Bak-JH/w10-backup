@@ -29,7 +29,7 @@ function Setting(){
         </PageContainer>
         <PageContainer>
             <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {
-                // window.electronAPI.setTimeRM(totalTime);
+                window.electronAPI.setTimeRM(totalTime);
                 window.electronAPI.washStartRM(false); 
                 navigate('/progress', {state: {time: totalTime}}); 
             }}>Start</ImageButton>
