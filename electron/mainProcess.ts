@@ -132,7 +132,7 @@ export class Process
             this._filePath = quick ? this._quickFileDir : this._washFileDir;
 
         this.readCommandFile(this.filePath, this.filePath == this._quickFileDir).then(()=>{
-            this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
+            if(quick) this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
             this._worker.run().then(() => {
                 this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
             }).catch((e) => {
