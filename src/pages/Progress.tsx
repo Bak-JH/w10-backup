@@ -93,6 +93,9 @@ function Progress(){
                             Remaining time
                         </TitleText>
                         <ValueText>
+                            {elaspedTime}
+                        </ValueText>
+                        <ValueText>
                             {
                                 timeC < 0 ?
                                 totalTime == 0 ? "Calculating" : -time.getMinutes() +"min " + -time.getSeconds() + "sec"
