@@ -93,7 +93,7 @@ function Progress(){
                             Remaining time
                         </TitleText>
                         <ValueText>
-                            {elaspedTime}
+                            {timeC < 0 ? elaspedTime - totalTime : totalTime - elaspedTime}
                         </ValueText>
                         <ValueText>
                             {
