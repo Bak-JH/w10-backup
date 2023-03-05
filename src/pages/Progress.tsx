@@ -65,7 +65,7 @@ function Progress(){
 
         stopwatchRef.current.start();
         const id = setInterval(() => {
-            setelaspedTime(stopwatchRef.current.getTime())
+            setelaspedTime((elaspedTime) => elaspedTime + 100)
         }, 100);
 
         return () => {
