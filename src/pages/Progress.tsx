@@ -65,7 +65,7 @@ function Progress(){
 
     let timeC = totalTime - elaspedTime;
     let time = timeC < 0 ? new Date(-timeC) : new Date(timeC);
-    let progressValue = Math.ceil((elaspedTime/totalTime)*100);
+    let progressValue = Math.floor((elaspedTime/totalTime)*100);
 
     return (
         <div>
@@ -78,9 +78,6 @@ function Progress(){
                         <TitleText>
                             Remaining time
                         </TitleText>
-                        <ValueText>
-                            {timeC < 0 ? elaspedTime - totalTime : totalTime - elaspedTime}
-                        </ValueText>
                         <ValueText>
                             {
                                 timeC < 0 ?
