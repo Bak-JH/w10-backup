@@ -19,13 +19,8 @@ import { ModalInfoMainArea, ModalInfoTitle, ModalInfoValue, ModalNotice } from '
 import { Stopwatch } from 'ts-stopwatch'
 import SlideText from '../components/SlideText';
 
-interface RouteState {
-    state: {time: number;}
-}
-
 function Progress(){
     const navigate = useNavigate();
-    const location = useLocation() as RouteState;
 
     const [totalTime, setTotalTime] = useState(0)
 
@@ -38,17 +33,8 @@ function Progress(){
 
     useEffect(()=>{
         window.electronAPI.pageChangedRM();
-
-        if(location.state) {
-            console.log("state: " + location.state.time)
-            setTotalTime(location.state.time * 1000);
-        }
-
-        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,time:number)=>{
-            if(!location.state) {
-                console.log("ui - " + time)
-                setTotalTime(time)
-            }
+        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,time:number)=>{                console.log("ui - " + time)
+            setTotalTime(time)
         })
 
         const workingStateListener = window.electronAPI.onWorkingStateChangedMR((event:IpcRendererEvent,state:string,message?:string)=>{

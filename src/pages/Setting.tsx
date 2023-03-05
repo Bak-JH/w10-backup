@@ -6,7 +6,6 @@ import styled from 'styled-components'
 
 import { useNavigate } from 'react-router-dom';
 import SetValue from '../components/SetValue';
-import { electron } from 'process';
 
 function Setting(){
     const navigate = useNavigate();
@@ -31,7 +30,7 @@ function Setting(){
             <ImageButton type="startBtn" src={settingImg} color="blue" onClick={() => {
                 window.electronAPI.setTimeRM(totalTime);
                 window.electronAPI.washStartRM(false); 
-                navigate('/progress', {state: {time: totalTime}}); 
+                navigate('/progress'); 
             }}>Start</ImageButton>
             <Button type="cancelBtn" color="gray" onClick={() => {navigate('/home')}}>Cancel</Button>        
         </PageContainer>
