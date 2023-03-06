@@ -1,4 +1,4 @@
-const Gpio = require('onoff').Gpio
+const Gpio = require('pigpio').Gpio
 import { Worker } from 'worker_threads';
 import { log } from './logging'
 import { Stopwatch } from 'ts-stopwatch';
@@ -22,6 +22,15 @@ enum PWMPin {
 //const
 const ActivePins = new Map<GPIOPin | PWMPin, typeof Gpio | null>();
 const PWMWorker = new Worker(__dirname + '/worker/pwmWorker.js');
+const PinMap = new Map<GPIOPin|PWMPin, typeof Gpio>([
+    [GPIOPin.pump1,      new Gpio(GPIOPin.pump1,      {mode:Gpio.OUTPUT})],
+    [GPIOPin.pump2,      new Gpio(GPIOPin.pump2,      {mode:Gpio.OUTPUT})],
+    [GPIOPin.valve,      new Gpio(GPIOPin.valve,      {mode:Gpio.OUTPUT})],
+    [GPIOPin.propeller1, new Gpio(GPIOPin.propeller1, {mode:Gpio.OUTPUT})],
+    
+    [PWMPin.pump,        new Gpio(PWMPin.pump,        {mode:Gpio.OUTPUT})],
+    [PWMPin.propeller,   new Gpio(PWMPin.propeller,   {mode:Gpio.OUTPUT})]
+])
 
 //function
 function disableAllPins() {
@@ -80,17 +89,14 @@ abstract class Action {
 abstract class GPIOAction extends Action {
     //variable
     private readonly _pin!:GPIOPin 
-    protected _pinObj!:typeof Gpio;
 
     //getter
     get pin() : GPIOPin { return this._pin; }
-    get pinObj() : typeof Gpio { return this._pinObj; }
 
     //method
     constructor(pin:GPIOPin) { 
         super(); 
         this._pin = pin; 
-        this._pinObj = new Gpio(pin, "out");
     }
 }
 abstract class PWMAction extends Action {
@@ -121,11 +127,7 @@ class GPIOEnable extends GPIOAction {
     }
     public run() {
         this._promise = new AbortablePromise((resolve) => {
-            this.pinObj.writeSync(toBinaryValue(this.enable));
-            if(this.enable)
-                ActivePins.set(this.pin, this._pinObj);
-            else
-                ActivePins.delete(this.pin);
+            PinMap.get(this.pin).digitalWrite(this.enable);
             log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
             resolve("done");
         });
@@ -150,14 +152,7 @@ class PWMEnable extends PWMAction {
     public async run() {
         this._promise = new AbortablePromise((resolve) => {
             log("PWMAction: PWMEnable " + this.enable);
-            
-            if(this.enable) {
-                ActivePins.set(this.pin, null);
-                PWMWorker.postMessage([PWMWorkerMethod.SetPin, this.pin]);
-            } else {
-                ActivePins.delete(this.pin);
-                PWMWorker.postMessage([PWMWorkerMethod.Stop]);
-            }
+            PinMap.get(this.pin).hardwarePwmWrite(65, 0.95);
 
             resolve("done");
         });
