@@ -5,10 +5,11 @@ import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
 import { BrowserWindow, ipcMain, IpcMainEvent } from 'electron';
 import { WorkerCH } from './ipc/cmdChannels';
-
 import { log } from './logging';
+
 export class Process
 {
+    //variables
     private _worker: WashWorker = new WashWorker();
     private _totalTime: number = 0;
     private _washTime:number = 0;
@@ -21,11 +22,42 @@ export class Process
     // private readonly _washFileDir = "./wash.hc";
     // private readonly _quickFileDir = "./quick.hc";
 
+    //getter
     get filePath() { return this._filePath; }
 
+    //method
     constructor(mainWindow:BrowserWindow) {
         this._renderEvent = mainWindow.webContents;
         this.connectEvents(mainWindow);
+    }
+
+    private connectEvents(mainWindow: BrowserWindow) {
+        ipcMain.on(WorkerCH.commandRM,(event:IpcMainEvent,cmd:string)=>{
+            switch(cmd)
+            {
+                case WorkingState.Stop:
+                    this._worker.stop();
+                    break;
+                case WorkingState.Pause:
+                    this._worker.pause();
+                    break;
+                case WorkingState.Resume:
+                    this._worker.resume().then(()=>{
+                        this._worker.run().then(()=>{
+                            this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop); 
+                        }).catch(()=>{});
+                    }).catch(() => {});
+                    break;
+            }
+        });
+
+        ipcMain.on(WorkerCH.setTimeRM, (event:IpcMainEvent, time:number)=>{
+            this._totalTime = time;
+        });
+
+        this._worker.onStateChangeCB((state:WorkingState,message?:string)=>{
+            mainWindow.webContents.send(WorkerCH.onWorkingStateChangedMR,state,message)
+        });
     }
 
     public getWashTime(time:number) {
@@ -35,6 +67,23 @@ export class Process
     public sendTotalTime() {
         this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
         log("total time: " + this._totalTime)
+    }
+    
+    public run(quick?:boolean) {
+        if(quick != null)
+            this._filePath = quick ? this._quickFileDir : this._washFileDir;
+
+        this.readCommandFile(this.filePath, this.filePath == this._quickFileDir).then(()=>{
+            this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
+            this._worker.run().then(() => {
+                this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
+            }).catch((e) => {
+                log("run error")}
+            );
+        }).catch((err)=>{
+            console.error(err);
+            exit(1);
+        });
     }
 
     private async readCommandFile(filePath:string, quick:boolean) {
@@ -126,23 +175,6 @@ export class Process
             });
         });
     }
-    
-    public run(quick?:boolean) {
-        if(quick != null)
-            this._filePath = quick ? this._quickFileDir : this._washFileDir;
-
-        this.readCommandFile(this.filePath, this.filePath == this._quickFileDir).then(()=>{
-            if(quick) this._renderEvent.send(WorkerCH.onSetTotalTimeMR, this._totalTime);
-            this._worker.run().then(() => {
-                this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop);
-            }).catch((e) => {
-                log("run error")}
-            );
-        }).catch((err)=>{
-            console.error(err);
-            exit(1);
-        });
-    }
 
     private parseBoolean(input:string):boolean {
         return input == "true";
@@ -172,34 +204,5 @@ export class Process
             default:
                 throw "PWM Pin out of range";
         }
-    }
-
-    private connectEvents(mainWindow: BrowserWindow) {
-        ipcMain.on(WorkerCH.commandRM,(event:IpcMainEvent,cmd:string)=>{
-            switch(cmd)
-            {
-                case WorkingState.Stop:
-                    this._worker.stop();
-                    break;
-                case WorkingState.Pause:
-                    this._worker.pause();
-                    break;
-                case WorkingState.Resume:
-                    this._worker.resume().then(()=>{
-                        this._worker.run().then(()=>{
-                            this._renderEvent.send(WorkerCH.onWorkingStateChangedMR, WorkingState.Stop); 
-                        }).catch(()=>{});
-                    }).catch(() => {});
-                    break;
-            }
-        });
-
-        ipcMain.on(WorkerCH.setTimeRM, (event:IpcMainEvent, time:number)=>{
-            this._totalTime = time;
-        });
-
-        this._worker.onStateChangeCB((state:WorkingState,message?:string)=>{
-            mainWindow.webContents.send(WorkerCH.onWorkingStateChangedMR,state,message)
-        });
     }
 }

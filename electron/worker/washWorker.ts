@@ -1,7 +1,6 @@
 import { parentPort } from 'worker_threads';
 import { Stopwatch } from 'ts-stopwatch';
 import { Action } from '../actions';
-
 import { log } from '../logging';
 
 if(parentPort){
@@ -10,12 +9,13 @@ if(parentPort){
     })
 }
 
+//enum
 export enum WorkingState{
-    Start = "start",
-    Stop = "stop",
-    Pause = "pause",
+    Start  = "start",
+    Stop   = "stop",
+    Pause  = "pause",
     Resume = "resume",
-    Error = "error"
+    Error  = "error"
 }
 
 export class WashWorker {
@@ -23,11 +23,12 @@ export class WashWorker {
     private _actions: Array<Action> = [];
     private _stopwatch: Stopwatch = new Stopwatch();
     private _workingState: WorkingState = WorkingState.Start;
-
     private _actionIdx: number = 0;
 
+    //getter
     get workingState() { return this._workingState; }
 
+    //method
     addAction(action:Action) {
         this._actions.push(action);
     }

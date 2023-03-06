@@ -6,22 +6,16 @@
 //*TW - Renderer to Main Two Way
 
 enum WorkerCH {  
-    startRM          = "worker:start, quick?:boolean",
-    commandRM          = "worker:command, cmd:string",
-    shutdownRM          = "worker:shutdown",
-    factoryResetRM          = "worker:factoryReset",
-    setTimeRM        = "worker:setTime, time:number",
-    pageChangedRM = "worker:pageChanged",
+    startRM          = "worker:start,       quick?:boolean",
+    commandRM        = "worker:command,     cmd:string",
+    shutdownRM       = "worker:shutdown",
+    factoryResetRM   = "worker:factoryReset",
+    setTimeRM        = "worker:setTime,     time:number",
+    pageChangedRM    = "worker:pageChanged",
 
-    onWorkingStateChangedMR = "worker:onWorkingStateChanged,state:string,message:string",
-    onProgressMR = "worker:onProgress,progress:number",
-    onSetTotalTimeMR = "worker:onSetTotalTimeMR, totalTime:number",
+    onWorkingStateChangedMR = "worker:onWorkingStateChanged, state:string, message:string",
+    onProgressMR            = "worker:onProgress,            progress:number",
+    onSetTotalTimeMR        = "worker:onSetTotalTimeMR,      totalTime:number",
 }
 
-enum ProductCH {
-    onShutDownEventMR = "product:onShutDownEvent",
-
-    shutDownRM = "product:onShutDown",
-}
-
-export {WorkerCH, ProductCH}
+export {WorkerCH}

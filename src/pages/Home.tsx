@@ -17,39 +17,38 @@ function Home(){
     <HomeArea>
         <HomeContainer>
             <ImageButton type="washBtn" src={waterImg} onClick={() => {navigate('/setting')}}>Wash</ImageButton>
-            <ImageButton type="quickBtn" src={quickImg} color="gray" onClick={() => { window.electronAPI.washStartRM(true); navigate('/progress'); }}>Quick<br />Wash</ImageButton>
+
+            <ImageButton type="quickBtn" src={quickImg} color="gray" 
+                         onClick={() => { window.electronAPI.washStartRM(true); navigate('/progress'); }}>
+            Quick<br />Wash
+            </ImageButton>
         </HomeContainer>
     </HomeArea>);
 }
 const HomeArea = styled.div`
-    display: flex;
-    width: 480px;
-    height: 320px;
-
-    justify-content: center;
-    align-items: center;
+    width           : 480px;
+    height          : 320px;
+    display         : flex;
+    justify-content : center;
+    align-items     : center;
 `
 const HomeContainer = styled.div`
-    display: grid;
-    grid-template-columns: 3fr 2fr;
-    grid-template-rows: auto auto;
-
-    justify-items: center;
-    align-items: center;
-
+    display               : grid;
+    grid-template-columns : 3fr 2fr;
+    grid-template-rows    : auto auto;
+    justify-items         : center;
+    align-items           : center;
     column-gap: 15px;
     
-    > button:nth-child(1){
-        grid-row-start: 1;
-        grid-row-end: 3;
+    > button:nth-child(1) {
+        grid-row-start : 1;
+        grid-row-end   : 3;
     }
-    > button:nth-child(2){
-        align-self: flex-start;
-
+    > button:nth-child(2) {
+        align-self : flex-start;
     }
-    > button:nth-child(3){
-        align-self: flex-end;
-
+    > button:nth-child(3) {
+        align-self : flex-end;
     }
 `
 

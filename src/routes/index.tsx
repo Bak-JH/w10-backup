@@ -1,7 +1,4 @@
-import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import Button from '../components/Button';
-
 import Home from '../pages/Home';
 import Setting from '../pages/Setting';
 import Progress from '../pages/Progress';
@@ -16,7 +13,6 @@ const AppRoute = () => {
             <Route path='/home' element={<Home/>}/>
             <Route path='/progress' element={<Progress/>}/>
             <Route path='/complete/:totalElapsedTime/:error' element={<Complete/>}/>
-
             <Route path='/setting' element={<Setting/>}/>
             
             

@@ -7,6 +7,14 @@ interface ModalInfoMainAreaProp{
 
 }
 
+interface ModalInfoTitleProp{
+    text:string
+}
+
+interface ModalInfoValueProp{
+    text:string
+}
+
 function ModalInfoMainArea({children} : ModalInfoMainAreaProp){
     return (
         <InfoArea >
@@ -15,18 +23,10 @@ function ModalInfoMainArea({children} : ModalInfoMainAreaProp){
     );
 }
 
-interface ModalInfoTitleProp{
-    text:string
-}
-
 function ModalInfoTitle({text} : ModalInfoTitleProp){
     return (
         <TitleText> {text} </TitleText>
     );
-}
-
-interface ModalInfoValueProp{
-    text:string
 }
 
 function ModalInfoValue({text} : ModalInfoValueProp){
@@ -36,9 +36,6 @@ function ModalInfoValue({text} : ModalInfoValueProp){
         </ValueText>
     );
 }
-interface ModalNoticeProp{
-    text:string
-}
 
 function ModalNotice({text} : ModalInfoTitleProp){
     return (
@@ -47,30 +44,28 @@ function ModalNotice({text} : ModalInfoTitleProp){
 }
 
 const InfoArea = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    justify-items: right;
-    row-gap: 8px;
-    column-gap: 26px;
-    width: 100%;
+    width                 : 100%;
+    display               : grid;
+    grid-template-columns : 1fr 1fr;
+    justify-items         : right;
+    row-gap               : 8px;
+    column-gap            : 26px;
 `
 const TitleText = styled.div`
-    font-size: 23px;
-    color: #474747;
-    background-color: #00000000;
-
-    justify-self: right;
-    /* min-width: 150px; */
-    max-width: 150px;
+    max-width        : 150px;
+    font-size        : 23px;
+    color            : #474747;
+    background-color : #000000;
+    justify-self     : right;
 `
 const ValueText = styled.div`
-    font-size: 23px;
-    color: #000000;
-    justify-self: left;
-    max-width: 180px;
+    max-width    : 180px;
+    font-size    : 23px;
+    color        : #000000;
+    justify-self : left;
 `
 const NoticeText = styled.div`
-    font-size: 18px;
+    font-size : 18px;
 `
-export {ModalInfoMainArea,ModalInfoTitle,ModalInfoValue,ModalNotice};
+export {ModalInfoMainArea, ModalInfoTitle, ModalInfoValue, ModalNotice};
 

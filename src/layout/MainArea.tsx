@@ -1,5 +1,4 @@
 import React from 'react';
-
 import styled from 'styled-components'
 
 interface MainAreaProp{
@@ -14,16 +13,13 @@ function MainArea({children} : MainAreaProp){
     );
 }
 
-
 const MainAreaDIV = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-direction: column;
-    
-    width: 479px;
-    height: 210px;
+    width           : 479px;
+    height          : 210px;
+    display         : flex;
+    align-items     : center;
+    justify-content : center;
+    flex-direction  : column;
 `
 
 export default MainArea;

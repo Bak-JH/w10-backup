@@ -3,8 +3,8 @@ import { Worker } from 'worker_threads';
 import { log } from './logging'
 import { Stopwatch } from 'ts-stopwatch';
 import { AbortablePromise } from 'simple-abortable-promise';
-import { resolve } from 'path';
 
+//enum
 enum GPIOPin {
     pump1         = 6,
     pump2         = 16,
@@ -18,13 +18,14 @@ enum PWMPin {
     propeller     = 13
 }
 
+//const
 const ActivePins = new Map<GPIOPin | PWMPin, typeof Gpio | null>();
 const PWMWorkers = new Map<PWMPin, Worker> ([
     [PWMPin.pump, new Worker(__dirname + '/worker/pwmWorker.js')], 
     [PWMPin.propeller, new Worker(__dirname + '/worker/pwmWorker.js')]
 ]);
 
-
+//function
 function disableAllPins() {
     return new Promise((resolve) => {
         ActivePins.forEach((obj, pin) => {
@@ -55,6 +56,7 @@ function toBinaryValue(boolValue:boolean):0 | 1 {
     return boolValue ? 1 : 0;
 }
 
+//class
 abstract class Action {
     //variable
     protected _promise!:AbortablePromise<unknown>;
@@ -230,6 +232,7 @@ class PWMLinearAccel extends PWMAction {
 
     private readonly wait = (timeToDelay:number) => new AbortablePromise((resolve) => setTimeout(resolve, timeToDelay));
 
+    //getter
     get startSpeed() : number { return this._startSpeed; }
     get targetSpeed() : number { return this._targetSpeed; }
     get duration() : number { return this._duration; }

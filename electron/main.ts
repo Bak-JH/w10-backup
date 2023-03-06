@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, IpcMainEvent, Menu, screen, session} from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, Menu } from 'electron';
 
 import path from 'path';
 import url from 'url';
@@ -6,8 +6,6 @@ import isDev from 'electron-is-dev';
 
 import { Process } from './mainProcess';
 import { WorkerCH } from './ipc/cmdChannels';
-
-import { log } from './logging';
 
 function createWindow() {
 

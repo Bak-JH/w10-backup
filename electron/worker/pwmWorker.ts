@@ -4,27 +4,29 @@ import { exit } from 'process';
 
 import { log } from '../logging';
 
+//enum
 enum WorkerMethod{
-    SetPin = "setPin",
-    SetPeriod = "setPeriod",
-    SetDuty = "setDuty",
+    SetPin      = "setPin",
+    SetPeriod   = "setPeriod",
+    SetDuty     = "setDuty",
     LinearAccel = "linearAccel",
-    Resume = "resume",
-    Stop = "stop"
+    Resume      = "resume",
+    Stop        = "stop"
 }
 
+//const
 const ON = 1;
 const OFF = 0;
 
+//variable
 let breakLoop = false;
 let stopInAccelLoop = false;
-
 let period:number = 0;
 let duty:number = 0;
-
 let pin:number;
 let gpioObj:typeof Gpio;
 
+//function
 const wait = (timeToDelay:number) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
 
 if(parentPort){
@@ -62,7 +64,6 @@ if(parentPort){
                 return;
         }
 
-
         if( value[0] != WorkerMethod.LinearAccel && 
             value[0] != WorkerMethod.Stop &&
             value[0] != WorkerMethod.Resume &&
@@ -84,10 +85,8 @@ async function loop() {
     while(!breakLoop)
     {
         await wait(period * Math.abs(1 - duty));
-        // console.log("1")
         gpioObj.writeSync(ON);
         await wait(period * duty);
-        // console.log("0")
         gpioObj.writeSync(OFF);
     }
 
@@ -113,10 +112,8 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
 
         for (let loopCount = 0; loopCount < timeStep / period && !breakLoop; ++loopCount) {
             await wait(period * Math.abs(1 - duty));
-            // console.log("1")
             gpioObj.writeSync(ON);
             await wait(period * duty);
-            // console.log("0")
             gpioObj.writeSync(OFF);
         }
 

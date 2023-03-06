@@ -1,23 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
-import classNames from 'classnames';
-
+import { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components'
-
 import Button from '../components/Button';
 import Footer from '../layout/Footer';
-
 import Modal from '../components/Modal';
-
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import MainArea from '../layout/MainArea';
 import Header from '../layout/Header';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ipcRenderer, IpcRendererEvent } from 'electron';
-
-import { ModalInfoMainArea, ModalInfoTitle, ModalInfoValue, ModalNotice } from '../layout/ModalInfo';
-
+import { useNavigate } from 'react-router-dom';
+import { IpcRendererEvent } from 'electron';
+import { ModalNotice } from '../layout/ModalInfo';
 import { Stopwatch } from 'ts-stopwatch'
-import SlideText from '../components/SlideText';
 
 function Progress(){
     const navigate = useNavigate();

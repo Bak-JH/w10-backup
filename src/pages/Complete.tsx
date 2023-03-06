@@ -15,36 +15,27 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { IpcRendererEvent } from 'electron';
 import SlideText from '../components/SlideText';
 import Modal from '../components/Modal';
-import { ModalInfoTitle, ModalInfoValue, ModalNotice } from '../layout/ModalInfo';
+import { ModalNotice } from '../layout/ModalInfo';
 
 function Complete(){
-    
     let navigate = useNavigate()
 
     const [isError, setIsError] = useState<boolean>(false);
     const [errorModalVisible, seterrorModalVisible] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
-    const [filename, setFilename] = useState<string>("helll world");
-    const [spentTime, setSpentTime] = useState<string>("Calculating");
-    const [resin, setResin] = useState<string>("none");
-
-    const { totalElapsedTime,error } = useParams()
 
     return (
     <div>
         <FinishArea>
                 <FinishImg src={isError ? errorImg : checkImg} width={60}/>
-                <FinishText>
-                    {
-                        isError ? "Wash Error!" : "Wash Compeleted!"
-                    }
-                </FinishText>
+                <FinishText>{ isError ? "Wash Error!" : "Wash Compeleted!"}</FinishText>
         </FinishArea>
         <Footer>
                 <Button color='gray' type='small' onClick={() => {
                     window.electronAPI.washStartRM();
                     navigate('/progress')
                 }}> Wash again </Button>
+
                 <Button color='blue' type='small' onClick={() => {
                     navigate('/') }}> Close </Button> 
         </Footer>
@@ -53,22 +44,20 @@ function Complete(){
         </Modal>
     </div>);
 }
+
 const FinishArea = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    flex-direction: column;
-    row-gap: 20px;
-
-    width: 479px;
-    height: 260px;
+    width           : 479px;
+    height          : 260px;
+    display         : flex;
+    align-items     : center;
+    justify-content : center;
+    flex-direction  : column;
+    row-gap         : 20px;
 `
 const FinishImg = styled.img``
-
 const FinishText = styled.div`
-    color: black;
-    font-size: 27px;
+    color     : black;
+    font-size : 27px;
 `
 
 export default Complete;

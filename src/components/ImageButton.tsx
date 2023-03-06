@@ -1,15 +1,14 @@
 import classNames from 'classnames';
-import React, { Children } from 'react'
+import React from 'react'
 import Button from './Button';
 import '../styles/ImageButton.scss'
 
 type ImageButtonProps = {
-    src: string;
-    type?: string;
-    color?: string;
-
-    onClick?: () => void;
-    children?: React.ReactNode;
+    src       : string;
+    type?     : string;
+    color?    : string;
+    onClick?  : () => void;
+    children? : React.ReactNode;
 }
 
 function ImageButton({src,type,color,onClick,children} : ImageButtonProps){
@@ -22,9 +21,9 @@ function ImageButton({src,type,color,onClick,children} : ImageButtonProps){
 }
 
 ImageButton.defaultProps = {
-    src: "",
-    type: "",
-    color: "blue",
+    src   : "",
+    type  : "",
+    color : "blue",
 }
 
 export default ImageButton;

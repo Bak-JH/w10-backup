@@ -1,9 +1,8 @@
 import React from 'react'
-
 import './Footer.scss';
 
 interface FooterProp{
-    children: React.ReactNode
+    children : React.ReactNode
 }
 
 function Footer({children} : FooterProp){
