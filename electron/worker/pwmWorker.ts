@@ -1,11 +1,9 @@
 import {parentPort} from 'worker_threads';
 const Gpio = require('onoff').Gpio
-import { exit } from 'process';
-
 import { log } from '../logging';
 
 //enum
-enum WorkerMethod{
+export enum PWMWorkerMethod{
     SetPin      = "setPin",
     SetPeriod   = "setPeriod",
     SetDuty     = "setDuty",
@@ -35,38 +33,38 @@ if(parentPort){
 
         switch(value[0])
         {
-            case WorkerMethod.SetPin:
+            case PWMWorkerMethod.SetPin:
                 pin = value[1];
                 if (!gpioObj) gpioObj = new Gpio(pin, 'out');
                 breakLoop = true;
                 duty = 0;
                 period = 0;
                 break;
-            case WorkerMethod.SetPeriod:
+            case PWMWorkerMethod.SetPeriod:
                 period = value[1];
                 breakLoop = true;
                 break;
-            case WorkerMethod.SetDuty:
+            case PWMWorkerMethod.SetDuty:
                 duty = value[1];
                 breakLoop = true;
                 break;
-            case WorkerMethod.LinearAccel:
+            case PWMWorkerMethod.LinearAccel:
                 breakLoop = true;
                 accelLoop(value[1], value[2], value[3]);
                 break;
-	        case WorkerMethod.Stop:
+	        case PWMWorkerMethod.Stop:
                 breakLoop = true;
                 break;
-            case WorkerMethod.Resume:
+            case PWMWorkerMethod.Resume:
                 breakLoop = false;
                 if(stopInAccelLoop) accelLoop(duty, value[1], value[2]);
                 else loop();
                 return;
         }
 
-        if( value[0] != WorkerMethod.LinearAccel && 
-            value[0] != WorkerMethod.Stop &&
-            value[0] != WorkerMethod.Resume &&
+        if( value[0] != PWMWorkerMethod.LinearAccel && 
+            value[0] != PWMWorkerMethod.Stop &&
+            value[0] != PWMWorkerMethod.Resume &&
             period > 0 && duty > 0 && duty < 1 && gpioObj)
         {
             loop();
@@ -132,5 +130,3 @@ async function accelLoop(startDuty:number, targetDuty:number, totalTime:number) 
     else parentPort?.postMessage([duty]);
     
 }
-
-export {WorkerMethod}

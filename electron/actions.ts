@@ -3,6 +3,7 @@ import { Worker } from 'worker_threads';
 import { log } from './logging'
 import { Stopwatch } from 'ts-stopwatch';
 import { AbortablePromise } from 'simple-abortable-promise';
+import { PWMWorkerMethod } from './worker/pwmWorker';
 
 //enum
 enum GPIOPin {
@@ -20,10 +21,7 @@ enum PWMPin {
 
 //const
 const ActivePins = new Map<GPIOPin | PWMPin, typeof Gpio | null>();
-const PWMWorkers = new Map<PWMPin, Worker> ([
-    [PWMPin.pump, new Worker(__dirname + '/worker/pwmWorker.js')], 
-    [PWMPin.propeller, new Worker(__dirname + '/worker/pwmWorker.js')]
-]);
+const PWMWorker = new Worker(__dirname + '/worker/pwmWorker.js');
 
 //function
 function disableAllPins() {
@@ -31,8 +29,8 @@ function disableAllPins() {
         ActivePins.forEach((obj, pin) => {
             if(pin == PWMPin.pump || pin == PWMPin.propeller)
             {
-                PWMWorkers.get(pin)?.postMessage(["stop"]);
-                PWMWorkers.get(pin)?.once('message', (message)=>{
+                PWMWorker.postMessage([PWMWorkerMethod.Stop]);
+                PWMWorker.once('message', (message)=>{
                     resolve(message);
                 })
             }
@@ -45,7 +43,7 @@ function disableAllPins() {
 function enableDisabledPins() {
     ActivePins.forEach((obj, pin) => {
         if(pin == PWMPin.pump || pin == PWMPin.propeller)
-            PWMWorkers.get(pin)?.postMessage(["resume"]);
+            PWMWorker.postMessage([PWMWorkerMethod.Resume]);
 
         if(pin != GPIOPin.valve)
             obj?.writeSync(1);
@@ -155,10 +153,10 @@ class PWMEnable extends PWMAction {
             
             if(this.enable) {
                 ActivePins.set(this.pin, null);
-                PWMWorkers.get(this.pin)?.postMessage(["setPin", this.pin]);
+                PWMWorker.postMessage([PWMWorkerMethod.SetPin, this.pin]);
             } else {
                 ActivePins.delete(this.pin);
-                PWMWorkers.get(this.pin)?.postMessage(["stop"]);
+                PWMWorker.postMessage([PWMWorkerMethod.Stop]);
             }
 
             resolve("done");
@@ -187,7 +185,7 @@ class PWMSetPeriod extends PWMAction {
         this._promise = new AbortablePromise((resolve) => {
             log("PWMAction: PWMSetPeriod");
 
-            PWMWorkers.get(this.pin)?.postMessage(["setPeriod", this.period]);
+            PWMWorker.postMessage([PWMWorkerMethod.SetPeriod, this.period]);
             resolve("done");
         });
 
@@ -212,8 +210,8 @@ class PWMSetDuty extends PWMAction {
         this._promise = new AbortablePromise ((resolve) => {
             log("PWMAction: PWMDuty");
                 
-            PWMWorkers.get(this.pin)?.postMessage(["setDuty", this.duty]);
-            PWMWorkers.get(this.pin)?.once('message', (message) => {
+            PWMWorker.postMessage([PWMWorkerMethod.SetDuty, this.duty]);
+            PWMWorker.once('message', (message) => {
                 resolve(message);
             });
         });
@@ -250,10 +248,10 @@ class PWMLinearAccel extends PWMAction {
         log("PWMAction: PWMLinearAccel");
 
         this._stopWatch.reset();
-        PWMWorkers.get(this.pin)?.postMessage(["linearAccel", this.startSpeed, this.targetSpeed, this.duration]);
+        PWMWorker.postMessage([PWMWorkerMethod.LinearAccel, this.startSpeed, this.targetSpeed, this.duration]);
         
         this._promise = new AbortablePromise ((resolve) => {
-            PWMWorkers.get(this.pin)?.once('message', (message) => {
+            PWMWorker.once('message', (message) => {
                 this._stopWatch.start();
                 if (message == "accel done")
                     resolve("done");
@@ -267,9 +265,9 @@ class PWMLinearAccel extends PWMAction {
         log("Stopped: PWMLinearAccel");
         this._stopWatch.stop();
 
-        PWMWorkers.get(this.pin)?.postMessage(["stop"]);
+        PWMWorker.postMessage([PWMWorkerMethod.Stop]);
         await new Promise ((resolve) => {
-            PWMWorkers.get(this.pin)?.once('message', (message) => {
+            PWMWorker.once('message', (message) => {
                 log(message);
                 resolve("done");
             });
