@@ -40,7 +40,8 @@ export function initializePWM() : void {
 
 function disableAllPins() {
     ActivePins.forEach((pin) => {
-        PinMap.get(pin).digitalWrite(0);
+        if(pin == PWMPin.pump || pin == PWMPin.propeller) PinMap.get(pin).pwmWrite(0);
+        else PinMap.get(pin).digitalWrite(0);
     });
 }
 
