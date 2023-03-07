@@ -20,7 +20,7 @@ enum PWMPin {
 }
 
 //const
-const ActivePins = new Map<GPIOPin | PWMPin, typeof Gpio | null>();
+const ActivePins = new Array<GPIOPin | PWMPin>();
 const PWMWorker = new Worker(__dirname + '/worker/pwmWorker.js');
 const PinMap = new Map<GPIOPin|PWMPin, typeof Gpio>([
     [GPIOPin.pump1,      new Gpio(GPIOPin.pump1,      {mode:Gpio.OUTPUT})],
@@ -33,34 +33,21 @@ const PinMap = new Map<GPIOPin|PWMPin, typeof Gpio>([
 ])
 
 //function
+export function initializePWM() : void {
+    PinMap.get(PWMPin.pump).pwmRange(100);
+    PinMap.get(PWMPin.propeller).pwmRange(100);
+}
+
 function disableAllPins() {
-    return new Promise((resolve) => {
-        ActivePins.forEach((obj, pin) => {
-            if(pin == PWMPin.pump || pin == PWMPin.propeller)
-            {
-                PWMWorker.postMessage([PWMWorkerMethod.Stop]);
-                PWMWorker.once('message', (message)=>{
-                    resolve(message);
-                })
-            }
-            if(pin != GPIOPin.valve)
-                obj?.writeSync(0);
-        });
+    ActivePins.forEach((pin) => {
+        PinMap.get(pin).digitalWrite(0);
     });
 }
 
 function enableDisabledPins() {
-    ActivePins.forEach((obj, pin) => {
-        if(pin == PWMPin.pump || pin == PWMPin.propeller)
-            PWMWorker.postMessage([PWMWorkerMethod.Resume]);
-
-        if(pin != GPIOPin.valve)
-            obj?.writeSync(1);
+    ActivePins.forEach((pin) => {
+        PinMap.get(pin).digitalWrite(1);
     });
-}
-  
-function toBinaryValue(boolValue:boolean):0 | 1 {
-    return boolValue ? 1 : 0;
 }
 
 //class
@@ -109,7 +96,7 @@ abstract class PWMAction extends Action {
     //method
     constructor(pin:PWMPin) {
         super(); 
-        this._pin = pin; 
+        this._pin = pin;
     }
 }
 
@@ -127,8 +114,8 @@ class GPIOEnable extends GPIOAction {
     }
     public run() {
         this._promise = new AbortablePromise((resolve) => {
+            log("GPIOAction: GPIOEnable(" + this.pin + "," + this._enable + ")");
             PinMap.get(this.pin).digitalWrite(this.enable);
-            log("GPIOAction: GPIOEnable(" + this.pin + "," + toBinaryValue(this._enable) + ")");
             resolve("done");
         });
 
@@ -152,8 +139,8 @@ class PWMEnable extends PWMAction {
     public async run() {
         this._promise = new AbortablePromise((resolve) => {
             log("PWMAction: PWMEnable " + this.enable);
-            PinMap.get(this.pin).hardwarePwmWrite(65, 0.95);
-
+            if(this.enable) PinMap.get(this.pin).pwmWrite(95);
+            else PinMap.get(this.pin).digitalWrite(0);
             resolve("done");
         });
 
