@@ -19,38 +19,40 @@ function Progress(){
     const [quitModalVisible,setQuitModalVisible] = useState<boolean>(false)
 
     const isError = useRef("false")
-    const stopwatchRef = useRef(new Stopwatch)
     const [elaspedTime, setelaspedTime] = useState(0)
     const [isPaused, setIsPaused] = useState<boolean>(false);
 
     useEffect(()=>{
         window.electronAPI.pageChangedRM();
-        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,time:number)=>{                console.log("ui - " + time)
+
+        let stopWatch = setInterval(() => {
+            setelaspedTime((elaspedTime) => elaspedTime + 1000)
+        }, 1000);
+
+        const setTotalTimeListener = window.electronAPI.onSetTotalTimeMR((event:IpcRendererEvent,time:number)=>{
+            console.log("ui - " + time)
             setTotalTime(time)
         })
 
         const workingStateListener = window.electronAPI.onWorkingStateChangedMR((event:IpcRendererEvent,state:string,message?:string)=>{
             if (state == "stop")
             {
-                stopwatchRef.current.stop();
-                navigate('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current);
+                clearInterval(stopWatch)
+                navigate('/complete/'+isError.current);
             }
             else if (state == "pause")
-                stopwatchRef.current.stop();
+                clearInterval(stopWatch)
             else if (state == "resume")
-                stopwatchRef.current.start();
+                stopWatch = setInterval(() => {
+                    setelaspedTime((elaspedTime) => elaspedTime + 1000)
+                }, 1000);
         })
-
-        stopwatchRef.current.start();
-        const id = setInterval(() => {
-            setelaspedTime((elaspedTime) => elaspedTime + 100)
-        }, 100);
 
         return () => {
             window.electronAPI.removeListener(setTotalTimeListener);
             window.electronAPI.removeListener(workingStateListener);
 
-            clearInterval(id);
+            clearInterval(stopWatch);
         }
     },[]);
 
@@ -108,7 +110,7 @@ function Progress(){
             </Footer>
             <Modal visible={quitModalVisible} selectString="Quit" backString="Resume"
                 onBackClicked={() => setQuitModalVisible(false)}
-                onSelectClicked={() => { window.electronAPI.washCommandRM("stop"); navigate('/complete/'+stopwatchRef.current.getTime()+"/"+isError.current); }}>
+                onSelectClicked={() => { window.electronAPI.washCommandRM("stop"); navigate('/complete/'+isError.current); }}>
                     <ModalNotice text="Are you sure to quit?"/>
             </Modal>
         </div>
