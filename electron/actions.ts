@@ -20,7 +20,7 @@ enum PWMPin {
 }
 
 //const
-const ActivePins = new Array<GPIOPin | PWMPin>();
+const ActivePins = new Array<{pin: GPIOPin | PWMPin, duty?:number}>();
 const PWMWorker = new Worker(__dirname + '/worker/pwmWorker.js');
 const PinMap = new Map<GPIOPin|PWMPin, typeof Gpio>([
     [GPIOPin.pump1,      new Gpio(GPIOPin.pump1,      {mode:Gpio.OUTPUT})],
@@ -39,9 +39,8 @@ export function initializePWM() : void {
 }
 
 function disableAllPins() {
-    ActivePins.forEach((pin) => {
-        if(pin == PWMPin.pump || pin == PWMPin.propeller) PinMap.get(pin).pwmWrite(0);
-        else PinMap.get(pin).digitalWrite(0);
+    ActivePins.forEach((obj) => {
+         PinMap.get(obj.pin).digitalWrite(0);
     });
 }
 
@@ -130,21 +129,26 @@ class GPIOEnable extends GPIOAction {
 class PWMEnable extends PWMAction {
     //variable
     private readonly _enable!:boolean
+    private readonly _frequency:number = 0;
+    private readonly _duty:number = 0;
 
     //getter
     get enable() : boolean { return this._enable; }
+    get duty() : number { return this._duty; }
 
     //method
-    constructor(pin:PWMPin, enable:boolean) { 
+    constructor(pin:PWMPin, enable:boolean, frequency?:number, duty?:number) { 
         super(pin); 
-        this._enable = enable; 
+        this._enable = enable;
+        if(frequency) PinMap.get(pin).pwmFrequency(frequency)
+        if(duty) this._duty = duty
     }
 
     public async run() {
         this._promise = new AbortablePromise((resolve) => {
-            log("PWMAction: PWMEnable " + this.enable);
+            log("PWMAction: PWMEnable " + this.enable + ", " + this.duty);
             if(this.enable) {
-                PinMap.get(this.pin).pwmWrite(95);
+                PinMap.get(this.pin).pwmWrite(this.duty);
                 ActivePins.push(this.pin);
             }
             else {
