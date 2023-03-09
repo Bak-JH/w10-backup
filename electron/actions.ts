@@ -117,6 +117,9 @@ class GPIOEnable extends GPIOAction {
         this._promise = new AbortablePromise((resolve) => {
             log("GPIOAction: GPIOEnable(" + this.pin + "," + this._enable + ")");
             PinMap.get(this.pin).digitalWrite(this.enable);
+
+            if(this.enable) ActivePins.push(this.pin);
+            else ActivePins.filter(pin => pin !== this.pin);
             resolve("done");
         });
 
@@ -140,8 +143,14 @@ class PWMEnable extends PWMAction {
     public async run() {
         this._promise = new AbortablePromise((resolve) => {
             log("PWMAction: PWMEnable " + this.enable);
-            if(this.enable) PinMap.get(this.pin).pwmWrite(95);
-            else PinMap.get(this.pin).digitalWrite(0);
+            if(this.enable) {
+                PinMap.get(this.pin).pwmWrite(95);
+                ActivePins.push(this.pin);
+            }
+            else {
+                PinMap.get(this.pin).digitalWrite(0);
+                ActivePins.filter(pin => pin !== this.pin);
+            }
             resolve("done");
         });
 
