@@ -139,25 +139,11 @@ export class Process
                                 isPropreller = true;
                             this._worker.addAction(
                                 new PWMEnable(this.parsePWM(pin),             // pin
-                                              this.parseBoolean(tokens[2]))); // enable or disable
+                                              this.parseBoolean(tokens[2]),   // enable or disable
+                                              parseInt(tokens[3]),
+                                              parseInt(tokens[4])));
                             break;
-
-                        case "pwmsetperiod":
-                        case "pwmSetPeriod":
-                        case "PWMSetPeriod":
-                            this._worker.addAction(
-                                new PWMSetPeriod(this.parsePWM(pin),      // pin
-                                                 parseFloat(tokens[2]))); // period
-                            break;
-
-                        case "pwmsetduty":
-                        case "pwmSetDuty":
-                        case "PWMSetDuty":
-                            this._worker.addAction(
-                                new PWMSetDuty(this.parsePWM(pin),      // pin
-                                               parseFloat(tokens[2]))); // duty
-                            break;
-
+                            
                         case "pwmlinearaccel":
                         case "pwmLinearAccel":
                         case "PWMLinearAccel":
