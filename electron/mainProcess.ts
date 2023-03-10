@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { WashWorker, WorkingState } from './worker/washWorker';
-import { Wait, GPIOEnable, PWMEnable, PWMSetDuty, PWMSetPeriod, PWMLinearAccel, initializePWM } from './actions';
+import { Wait, GPIOEnable, PWMEnable, PWMLinearAccel, initializePWM } from './actions';
 import { GPIOPin, PWMPin } from './actions';
 import { exit } from 'process';
 import { BrowserWindow, ipcMain, IpcMainEvent } from 'electron';

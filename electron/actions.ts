@@ -3,7 +3,6 @@ import { Worker } from 'worker_threads';
 import { log } from './logging'
 import { Stopwatch } from 'ts-stopwatch';
 import { AbortablePromise } from 'simple-abortable-promise';
-import { PWMWorkerMethod } from './worker/pwmWorker';
 
 //enum
 enum GPIOPin {
@@ -165,61 +164,6 @@ class PWMEnable extends PWMAction {
     }
 }
 
-class PWMSetPeriod extends PWMAction {
-    //variable
-    private readonly _period!:number;
-
-    //getter
-    get period() : number { return this._period; }
-
-    //method
-    constructor(pin:PWMPin, period:number) {
-        super(pin); 
-        
-        if(period < 0) return; 
-        this._period = period; 
-    }
-
-    public run() {
-        this._promise = new AbortablePromise((resolve) => {
-            log("PWMAction: PWMSetPeriod");
-
-            PWMWorker.postMessage([PWMWorkerMethod.SetPeriod, this.period]);
-            resolve("done");
-        });
-
-        return this._promise;
-    }
-}
-
-class PWMSetDuty extends PWMAction {
-    //variable
-    private readonly _duty!:number;
-
-    //getter
-    get duty() : number { return this._duty; }
-
-    //method
-    constructor(pin:PWMPin, duty:number) { 
-        super(pin); 
-        if(duty < 0 || duty > 1) return;
-        this._duty = duty; 
-    }
-    public run() {        
-        this._promise = new AbortablePromise ((resolve) => {
-            log("PWMAction: PWMDuty");
-                
-            PWMWorker.postMessage([PWMWorkerMethod.SetDuty, this.duty]);
-            PWMWorker.once('message', (message) => {
-                resolve(message);
-            });
-        });
-        
-        return this._promise;
-    }
-}
-
-
 class PWMLinearAccel extends PWMAction {
     //variable
     private readonly _startSpeed!:number
@@ -247,7 +191,6 @@ class PWMLinearAccel extends PWMAction {
         log("PWMAction: PWMLinearAccel");
 
         this._stopWatch.reset();
-        PWMWorker.postMessage([PWMWorkerMethod.LinearAccel, this.startSpeed, this.targetSpeed, this.duration]);
         
         this._promise = new AbortablePromise ((resolve) => {
             PWMWorker.once('message', (message) => {
@@ -264,7 +207,6 @@ class PWMLinearAccel extends PWMAction {
         log("Stopped: PWMLinearAccel");
         this._stopWatch.stop();
 
-        PWMWorker.postMessage([PWMWorkerMethod.Stop]);
         await new Promise ((resolve) => {
             PWMWorker.once('message', (message) => {
                 log(message);
@@ -326,5 +268,5 @@ class Wait extends Action {
 
 export {Action} // abstract class
 export {GPIOPin, PWMPin} // enum
-export {Wait, GPIOEnable, PWMEnable, PWMLinearAccel, PWMSetDuty, PWMSetPeriod} // actions
+export {Wait, GPIOEnable, PWMEnable, PWMLinearAccel} // actions
 export {ActivePins} // const
