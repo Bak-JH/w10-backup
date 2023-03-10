@@ -46,7 +46,8 @@ function disableAllPins() {
 
 function enableDisabledPins() {
     ActivePins.forEach((obj) => {
-        PinMap.get(obj.pin).digitalWrite(obj.duty ? obj.duty : 1);
+        if(obj.duty) PinMap.get(obj.pin).pwmWrite(obj.duty);
+        else if (obj.pin != GPIOPin.valve) PinMap.get(obj.pin).digitalWrite(1);
     });
 }
 
@@ -118,7 +119,8 @@ class GPIOEnable extends GPIOAction {
             PinMap.get(this.pin).digitalWrite(this.enable);
 
             if(this.enable) ActivePins.push({pin: this.pin});
-            else ActivePins.filter(obj => obj.pin !== this.pin);
+            else ActivePins.splice(ActivePins.indexOf({pin: this.pin}));
+            
             resolve("done");
         });
 
@@ -153,7 +155,7 @@ class PWMEnable extends PWMAction {
             }
             else {
                 PinMap.get(this.pin).digitalWrite(0);
-                ActivePins.filter(obj => obj.pin !== this.pin);
+                ActivePins.splice(ActivePins.indexOf({pin: this.pin}));
             }
             resolve("done");
         });
