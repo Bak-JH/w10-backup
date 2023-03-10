@@ -20,7 +20,6 @@ enum PWMPin {
 
 //const
 const ActivePins = new Array<{pin: GPIOPin | PWMPin, duty?:number}>();
-const PWMWorker = new Worker(__dirname + '/worker/pwmWorker.js');
 const PinMap = new Map<GPIOPin|PWMPin, typeof Gpio>([
     [GPIOPin.pump1,      new Gpio(GPIOPin.pump1,      {mode:Gpio.OUTPUT})],
     [GPIOPin.pump2,      new Gpio(GPIOPin.pump2,      {mode:Gpio.OUTPUT})],
@@ -193,11 +192,7 @@ class PWMLinearAccel extends PWMAction {
         this._stopWatch.reset();
         
         this._promise = new AbortablePromise ((resolve) => {
-            PWMWorker.once('message', (message) => {
-                this._stopWatch.start();
-                if (message == "accel done")
-                    resolve("done");
-            });
+
         });
         
         return this._promise;
@@ -208,10 +203,7 @@ class PWMLinearAccel extends PWMAction {
         this._stopWatch.stop();
 
         await new Promise ((resolve) => {
-            PWMWorker.once('message', (message) => {
-                log(message);
-                resolve("done");
-            });
+
         });
         
         super.stop();
