@@ -40,14 +40,14 @@ export function initializePWM() : void {
 
 function disableAllPins() {
     ActivePins.forEach((obj) => {
-         PinMap.get(obj.pin).digitalWrite(0);
+        PinMap.get(obj.pin).digitalWrite(0);
     });
 }
 
 function enableDisabledPins() {
     ActivePins.forEach((obj) => {
         if(obj.duty) PinMap.get(obj.pin).pwmWrite(obj.duty);
-        else if (obj.pin != GPIOPin.valve) PinMap.get(obj.pin).digitalWrite(1);
+        else PinMap.get(obj.pin).digitalWrite(1);
     });
 }
 
@@ -118,9 +118,10 @@ class GPIOEnable extends GPIOAction {
             log("GPIOAction: GPIOEnable(" + this.pin + "," + this._enable + ")");
             PinMap.get(this.pin).digitalWrite(this.enable);
 
-            if(this.enable) ActivePins.push({pin: this.pin});
+            if(this.enable && this.pin != GPIOPin.valve) 
+                ActivePins.push({pin: this.pin});
             else ActivePins.splice(ActivePins.indexOf({pin: this.pin}));
-            
+
             resolve("done");
         });
 

@@ -143,7 +143,7 @@ export class Process
                                               parseInt(tokens[3]),
                                               parseInt(tokens[4])));
                             break;
-                            
+
                         case "pwmlinearaccel":
                         case "pwmLinearAccel":
                         case "PWMLinearAccel":
